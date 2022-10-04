@@ -142,18 +142,7 @@ impl<C: ManagedConfig> TaskContext<ImageTask<C>> {
 
         let mut networks = Networks::default();
         self.inner.image.networks(&mut networks);
-        let mut endpoints = HashMap::new();
-        for resource in networks.build() {
-            let net_name = self
-                .resource(&resource)
-                .ok_or_else(|| anyhow!("Network {:?} not available in resources. Check dependencies.", resource))?
-                .to_string();
-            let endpoint = EndpointSettings {
-                aliases: Some(vec![self.inner.container_name.clone()]),
-                ..Default::default()
-            };
-            endpoints.insert(net_name, endpoint);
-        }
+        let networks = self.networks_map(networks)?;
 
         let mut volumes = Volumes::default();
         self.inner.image.volumes(&mut volumes);
@@ -162,7 +151,6 @@ impl<C: ManagedConfig> TaskContext<ImageTask<C>> {
         let mut mounts = Mounts::default();
         self.inner.image.mounts(&mut mounts);
         let mounts = self.mounts_map(mounts.build())?;
-
         let ports = ports.build();
         let config = Config {
             image: Some(self.inner.image_name.clone()),
@@ -183,9 +171,7 @@ impl<C: ManagedConfig> TaskContext<ImageTask<C>> {
                 mounts: Some(mounts),
                 ..Default::default()
             }),
-            networking_config: Some(NetworkingConfig {
-                endpoints_config: endpoints,
-            }),
+            networking_config: Some(networks),
             ..Default::default()
         };
         self.driver.create_container(Some(opts), config).await?;
@@ -215,6 +201,24 @@ impl<C: ManagedConfig> TaskContext<ImageTask<C>> {
             .remove_container(&self.inner.container_name, Some(opts))
             .await?;
         Ok(())
+    }
+
+    fn networks_map(&self, networks: Networks) -> Result<NetworkingConfig<String>, Error> {
+        let mut endpoints = HashMap::new();
+        for resource in networks.build() {
+            let net_name = self
+                .resource(&resource)
+                .ok_or_else(|| anyhow!("Network {:?} not available in resources. Check dependencies.", resource))?
+                .to_string();
+            let endpoint = EndpointSettings {
+                aliases: Some(vec![self.inner.container_name.clone()]),
+                ..Default::default()
+            };
+            endpoints.insert(net_name, endpoint);
+        }
+        Ok(NetworkingConfig {
+            endpoints_config: endpoints,
+        })
     }
 
     fn make_mount(&self, mount: Mount) -> Result<BollardMount, Error> {
