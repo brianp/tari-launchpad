@@ -113,11 +113,11 @@ impl ContainerChecker for Checker {
         // TODO: Keep the client
         let mut client = BaseNodeGrpcClient::connect("http://127.0.0.1:18142").await?;
         let progress = client.get_sync_progress(grpc::Empty {}).await?.into_inner();
-        let current = progress.local_height as f32;
-        let total = progress.tip_height as f32;
-        let pct = current / total * 100.0;
+        let current = progress.local_height;
+        let total = progress.tip_height;
+        let pct = current as f32 / total as f32 * 100.0;
         ctx.send(CheckerEvent::Progress(pct as u8)).ok();
-        if current == total {
+        if current == total && total != 0 {
             ctx.send(CheckerEvent::Ready).ok();
         }
         Ok(())

@@ -41,6 +41,7 @@ impl CheckerContext {
 #[async_trait]
 pub trait ContainerChecker: Send {
     async fn entrypoint(mut self: Box<Self>, mut ctx: CheckerContext) {
+        ctx.send(CheckerEvent::Progress(0)).ok();
         loop {
             select! {
                 log_event = ctx.logs.next() => {
