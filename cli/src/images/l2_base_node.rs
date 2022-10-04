@@ -1,7 +1,20 @@
+use anyhow::Error;
+use async_trait::async_trait;
+use tari_base_node_grpc_client::{grpc, BaseNodeGrpcClient};
 use tari_sdm::{
     ids::{ManagedTask, TaskId},
-    image::{Args, Envs, ManagedContainer, Mounts, Networks, Ports, Volumes},
+    image::{
+        checker::{CheckerContext, CheckerEvent, ContainerChecker},
+        Args,
+        Envs,
+        ManagedContainer,
+        Mounts,
+        Networks,
+        Ports,
+        Volumes,
+    },
 };
+use tokio::time::{sleep, Duration};
 
 use super::{Tor, BLOCKCHAIN_PATH, BLOCKCHAIN_VOLUME, DEFAULT_REGISTRY, GENERAL_VOLUME, VAR_TARI_PATH};
 use crate::{
@@ -39,6 +52,10 @@ impl ManagedContainer for TariBaseNode {
     fn reconfigure(&mut self, config: Option<&Self::Config>) -> bool {
         self.settings = config.map(ConnectionSettings::from);
         self.settings.is_some()
+    }
+
+    fn checker(&mut self) -> Box<dyn ContainerChecker> {
+        Box::new(Checker::new())
     }
 
     fn args(&self, args: &mut Args) {
@@ -79,6 +96,43 @@ impl ManagedContainer for TariBaseNode {
             // TODO: Avoid using display here
             mounts.bind_path(settings.data_directory.display(), VAR_TARI_PATH);
             mounts.add_volume(SharedVolume::id(), BLOCKCHAIN_PATH);
+        }
+    }
+}
+
+pub struct Checker {}
+
+impl Checker {
+    fn new() -> Self {
+        Self {}
+    }
+
+    async fn step(&mut self, ctx: &mut CheckerContext) -> Result<(), Error> {
+        let mut client = BaseNodeGrpcClient::connect("http://base_node:18142").await?;
+        loop {
+            let progress = client.get_sync_progress(grpc::Empty {}).await?.into_inner();
+            let current = progress.local_height as f32;
+            let total = progress.tip_height as f32;
+            let pct = current / total * 100.0;
+            ctx.send(CheckerEvent::Progress(pct as u8)).ok();
+            if current == total {
+                ctx.send(CheckerEvent::Ready).ok();
+                break;
+            } else {
+                sleep(Duration::from_secs(1)).await;
+            }
+        }
+        Ok(())
+    }
+}
+
+#[async_trait]
+impl ContainerChecker for Checker {
+    async fn entrypoint(mut self: Box<Self>, mut ctx: CheckerContext) {
+        loop {
+            if self.step(&mut ctx).await.is_ok() {
+                break;
+            }
         }
     }
 }

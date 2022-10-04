@@ -51,7 +51,7 @@ impl ManagedContainer for Tor {
     }
 
     fn checker(&mut self) -> Box<dyn ContainerChecker> {
-        Box::new(TorChecker::new())
+        Box::new(Checker::new())
     }
 
     fn args(&self, args: &mut Args) {
@@ -78,11 +78,11 @@ impl ManagedContainer for Tor {
     }
 }
 
-pub struct TorChecker {
+pub struct Checker {
     re: Regex,
 }
 
-impl TorChecker {
+impl Checker {
     fn new() -> Self {
         let re = Regex::new(r"Bootstrapped\s+(?P<pct>\d+)%").unwrap();
         Self { re }
@@ -90,7 +90,7 @@ impl TorChecker {
 }
 
 #[async_trait]
-impl ContainerChecker for TorChecker {
+impl ContainerChecker for Checker {
     // TODO: Add result here?
     async fn on_log_event(&mut self, record: String, ctx: &mut CheckerContext) {
         if let Some(caps) = self.re.captures(&record) {
