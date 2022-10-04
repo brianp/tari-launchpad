@@ -14,7 +14,6 @@ use tari_sdm::{
         Volumes,
     },
 };
-use tokio::time::{sleep, Duration};
 
 use super::{Tor, BLOCKCHAIN_PATH, BLOCKCHAIN_VOLUME, DEFAULT_REGISTRY, GENERAL_VOLUME, VAR_TARI_PATH};
 use crate::{
@@ -106,33 +105,21 @@ impl Checker {
     fn new() -> Self {
         Self {}
     }
-
-    async fn step(&mut self, ctx: &mut CheckerContext) -> Result<(), Error> {
-        let mut client = BaseNodeGrpcClient::connect("http://base_node:18142").await?;
-        loop {
-            let progress = client.get_sync_progress(grpc::Empty {}).await?.into_inner();
-            let current = progress.local_height as f32;
-            let total = progress.tip_height as f32;
-            let pct = current / total * 100.0;
-            ctx.send(CheckerEvent::Progress(pct as u8)).ok();
-            if current == total {
-                ctx.send(CheckerEvent::Ready).ok();
-                break;
-            } else {
-                sleep(Duration::from_secs(1)).await;
-            }
-        }
-        Ok(())
-    }
 }
 
 #[async_trait]
 impl ContainerChecker for Checker {
-    async fn entrypoint(mut self: Box<Self>, mut ctx: CheckerContext) {
-        loop {
-            if self.step(&mut ctx).await.is_ok() {
-                break;
-            }
+    async fn on_interval(&mut self, ctx: &mut CheckerContext) -> Result<(), Error> {
+        // TODO: Keep the client
+        let mut client = BaseNodeGrpcClient::connect("http://127.0.0.1:18142").await?;
+        let progress = client.get_sync_progress(grpc::Empty {}).await?.into_inner();
+        let current = progress.local_height as f32;
+        let total = progress.tip_height as f32;
+        let pct = current / total * 100.0;
+        ctx.send(CheckerEvent::Progress(pct as u8)).ok();
+        if current == total {
+            ctx.send(CheckerEvent::Ready).ok();
         }
+        Ok(())
     }
 }

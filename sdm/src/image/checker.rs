@@ -4,7 +4,11 @@ use anyhow::Error;
 use async_trait::async_trait;
 use derive_more::{Deref, DerefMut};
 use futures::stream::{FusedStream, Stream, StreamExt};
-use tokio::{select, sync::mpsc};
+use tokio::{
+    select,
+    sync::mpsc,
+    time::{sleep, Duration},
+};
 
 use super::task::Event;
 
@@ -42,8 +46,11 @@ pub trait ContainerChecker: Send {
                 log_event = ctx.logs.next() => {
                     if let Some(Ok(msg)) = log_event {
                         self.on_log_event(msg, &mut ctx).await;
-                    } else {
-                        break;
+                    }
+                }
+                _ = sleep(Duration::from_secs(1)) => {
+                    if let Err(err) = self.on_interval(&mut ctx).await {
+                        log::error!("On interval checker failed: {}", err);
                     }
                 }
             }
@@ -51,6 +58,10 @@ pub trait ContainerChecker: Send {
     }
 
     async fn on_log_event(&mut self, record: String, ctx: &mut CheckerContext) {}
+
+    async fn on_interval(&mut self, _ctx: &mut CheckerContext) -> Result<(), Error> {
+        Ok(())
+    }
 }
 
 pub struct ReadyIfStarted;
