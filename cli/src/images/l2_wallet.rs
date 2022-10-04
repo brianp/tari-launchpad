@@ -4,10 +4,16 @@ use tari_sdm::{
 };
 
 use super::{TariBaseNode, DEFAULT_REGISTRY, GENERAL_VOLUME};
-use crate::config::LaunchpadConfig;
+use crate::{
+    config::{ConnectionSettings, LaunchpadConfig},
+    networks::LocalNet,
+    volumes::SharedVolume,
+};
 
-#[derive(Debug)]
-pub struct TariWallet;
+#[derive(Debug, Default)]
+pub struct TariWallet {
+    settings: Option<ConnectionSettings>,
+}
 
 impl ManagedTask for TariWallet {
     fn id() -> TaskId {
@@ -15,7 +21,7 @@ impl ManagedTask for TariWallet {
     }
 
     fn deps() -> Vec<TaskId> {
-        vec![TariBaseNode::id()]
+        vec![LocalNet::id(), SharedVolume::id(), TariBaseNode::id()]
     }
 }
 
@@ -28,6 +34,11 @@ impl ManagedContainer for TariWallet {
 
     fn image_name(&self) -> &str {
         "tari_wallet"
+    }
+
+    fn reconfigure(&mut self, config: Option<&Self::Config>) -> bool {
+        self.settings = config.map(ConnectionSettings::from);
+        self.settings.is_some()
     }
 
     fn ports(&self, ports: &mut Ports) {

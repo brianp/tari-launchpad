@@ -19,6 +19,7 @@ async fn main() -> Result<(), Error> {
     scope.add_volume(volumes::SharedVolume::default()).await?;
     scope.add_image(images::Tor::default()).await?;
     scope.add_image(images::TariBaseNode::default()).await?;
+    scope.add_image(images::TariWallet::default()).await?;
     // scope.add_image(images::Loki::default()).await?;
     // scope.add_image(images::Promtail::default()).await?;
     // scope.add_image(images::Grafana::default()).await?;
