@@ -10,6 +10,7 @@ use tari_sdm::{
         Networks,
     },
 };
+use tor_hash_passwd::EncryptedKey;
 
 use super::DEFAULT_REGISTRY;
 use crate::{
@@ -60,19 +61,20 @@ impl ManagedContainer for Tor {
         args.set_pair("--ClientOnly", 1);
         args.set_pair("--ClientUseIPv6", 1);
         if let Some(settings) = self.settings.as_ref() {
-            args.set_pair("--HashedControlPassword", settings.tor_password.reveal());
+            let hashed = EncryptedKey::hash_password(settings.tor_password.reveal());
+            args.set_pair("--HashedControlPassword", hashed);
         }
         args.flag("--allow-missing-torrc");
     }
 
     fn envs(&self, envs: &mut Envs) {
         if let Some(settings) = self.settings.as_ref() {
-            settings.apply(envs);
+            settings.add_common(envs);
         }
     }
 
     fn networks(&self, networks: &mut Networks) {
-        networks.add(LocalNet::id());
+        networks.add("tor", LocalNet::id());
     }
 }
 

@@ -44,7 +44,7 @@ use crate::{
         Ports,
         Volumes,
     },
-    task::TaskContext,
+    task::{RunnableTask, TaskContext},
     utils::TaskGuard,
 };
 
@@ -205,13 +205,13 @@ impl<C: ManagedConfig> TaskContext<ImageTask<C>> {
 
     fn networks_map(&self, networks: Networks) -> Result<NetworkingConfig<String>, Error> {
         let mut endpoints = HashMap::new();
-        for resource in networks.build() {
+        for (alias, resource) in networks.build() {
             let net_name = self
                 .resource(&resource)
                 .ok_or_else(|| anyhow!("Network {:?} not available in resources. Check dependencies.", resource))?
                 .to_string();
             let endpoint = EndpointSettings {
-                aliases: Some(vec![self.inner.container_name.clone()]),
+                aliases: Some(vec![alias]),
                 ..Default::default()
             };
             endpoints.insert(net_name, endpoint);

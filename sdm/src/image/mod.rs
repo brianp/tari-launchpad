@@ -99,14 +99,14 @@ impl Ports {
 }
 
 #[derive(Default)]
-pub struct Networks(Vec<TaskId>);
+pub struct Networks(Vec<(String, TaskId)>);
 
 impl Networks {
-    pub fn add(&mut self, id: TaskId) {
-        self.0.push(id);
+    pub fn add(&mut self, hostname: impl ToString, id: TaskId) {
+        self.0.push((hostname.to_string(), id));
     }
 
-    pub fn build(self) -> Vec<TaskId> {
+    pub fn build(self) -> Vec<(String, TaskId)> {
         self.0
     }
 }

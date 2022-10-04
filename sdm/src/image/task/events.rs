@@ -74,7 +74,7 @@ impl<C: ManagedConfig> TaskContext<ImageTask<C>> {
             },
             Status::Started { .. } => {
                 // TODO: Add waiting interval + fallback
-                self.status.set(Status::CleanDangling);
+                // self.status.set(Status::CleanDangling);
             },
             _ => {},
         }

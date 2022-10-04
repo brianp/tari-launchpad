@@ -1,6 +1,6 @@
 use tari_sdm::{
     ids::{ManagedTask, TaskId},
-    image::{Args, ManagedContainer, Mounts, Networks, Ports, Volumes},
+    image::{Args, Envs, ManagedContainer, Mounts, Networks, Ports, Volumes},
 };
 
 use super::{Tor, BLOCKCHAIN_PATH, BLOCKCHAIN_VOLUME, DEFAULT_REGISTRY, GENERAL_VOLUME, VAR_TARI_PATH};
@@ -47,13 +47,26 @@ impl ManagedContainer for TariBaseNode {
         args.set("--watch", "status");
     }
 
+    fn envs(&self, envs: &mut Envs) {
+        if let Some(settings) = self.settings.as_ref() {
+            settings.add_common(envs);
+            settings.add_tor(envs);
+            envs.set("WAIT_FOR_TOR", 10);
+            envs.set(
+                "TARI_BASE_NODE__DATA_DIR",
+                format!("/blockchain/{}", settings.tari_network.lower_case()),
+            );
+        }
+        envs.set("APP_NAME", "base_node");
+    }
+
     fn ports(&self, ports: &mut Ports) {
         ports.add(18_142);
         ports.add(18_189);
     }
 
     fn networks(&self, networks: &mut Networks) {
-        networks.add(LocalNet::id());
+        networks.add("base_node", LocalNet::id());
     }
 
     fn volumes(&self, volumes: &mut Volumes) {

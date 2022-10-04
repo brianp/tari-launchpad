@@ -28,7 +28,6 @@ use serde::{Deserialize, Serialize};
 use tari_sdm::{config::ManagedConfig, image::Envs};
 use tari_utilities::Hidden;
 use thiserror::Error;
-use tor_hash_passwd::EncryptedKey;
 
 pub const DEFAULT_MONEROD_URL: &str = "http://stagenet.xmr-tw.org:38081,\
 http://stagenet.community.xmr.to:38081,\
@@ -38,6 +37,7 @@ http://singapore.node.xmr.pm:38081";
 
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
 pub struct BaseNodeConfig {
+    // TODO: Remove (not needed)
     /// The time delay before starting the container and running the base node executable
     pub delay: Duration,
 }
@@ -45,8 +45,10 @@ pub struct BaseNodeConfig {
 #[derive(Default, Derivative, Serialize, Deserialize, Clone)]
 #[derivative(Debug)]
 pub struct WalletConfig {
+    // TODO: Remove (not needed)
     /// The time delay before starting the container and running the wallet executable
     pub delay: Duration,
+
     /// The password to de/en-crypt the wallet database
     #[serde(skip_serializing)]
     #[derivative(Debug = "ignore")]
@@ -153,16 +155,15 @@ impl ManagedConfig for LaunchpadConfig {}
 
 #[derive(Debug)]
 pub struct ConnectionSettings {
-    pub tor_password: Hidden<EncryptedKey>,
+    pub tor_password: Hidden<String>,
     pub tari_network: TariNetwork,
     pub data_directory: PathBuf,
 }
 
 impl<'a> From<&'a LaunchpadConfig> for ConnectionSettings {
     fn from(config: &'a LaunchpadConfig) -> Self {
-        let encrypted = EncryptedKey::hash_password(config.tor_control_password.reveal());
         ConnectionSettings {
-            tor_password: Hidden::hide(encrypted),
+            tor_password: config.tor_control_password.clone(),
             tari_network: config.tari_network,
             data_directory: config.data_directory.clone(),
         }
@@ -170,9 +171,12 @@ impl<'a> From<&'a LaunchpadConfig> for ConnectionSettings {
 }
 
 impl ConnectionSettings {
-    pub fn apply(&self, envs: &mut Envs) {
+    pub fn add_tor(&self, envs: &mut Envs) {
         let value = format!("password={}", self.tor_password.reveal());
         envs.set("TARI_BASE_NODE__P2P__TRANSPORT__TOR__CONTROL_AUTH", value);
+    }
+
+    pub fn add_common(&self, envs: &mut Envs) {
         envs.set("TARI_NETWORK", self.tari_network.lower_case());
         envs.set("DATA_FOLDER", self.data_directory.to_str().unwrap_or(""));
         envs.set("TARI_LOG_CONFIGURATION", "/var/tari/config/log4rs.yml");
