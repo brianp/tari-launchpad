@@ -13,7 +13,7 @@ use tokio::{
 use tokio_stream::wrappers::{BroadcastStream, UnboundedReceiverStream};
 
 use crate::{
-    config::ManagedConfig,
+    config::ManagedProtocol,
     ids::{ManagedTask, TaskId},
     scope::ControlEvent,
     status::SdmStatus,
@@ -27,7 +27,7 @@ pub trait TaskStatus: fmt::Debug + Default + Send {
 
 #[async_trait]
 pub trait RunnableTask: Sized + Send + 'static {
-    type Config: ManagedConfig;
+    type Config: ManagedProtocol;
     type Status: TaskStatus;
     type Event: TaskEvent;
 

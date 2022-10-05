@@ -2,13 +2,13 @@ use anyhow::Error;
 
 use super::{Event, ImageTask, Status};
 use crate::{
-    config::ManagedConfig,
+    config::ManagedProtocol,
     image::checker::{CheckerContext, CheckerEvent},
     task::TaskContext,
     utils::TaskGuard,
 };
 
-impl<C: ManagedConfig> TaskContext<ImageTask<C>> {
+impl<C: ManagedProtocol> TaskContext<ImageTask<C>> {
     pub fn process_event_impl(&mut self, event: Event) -> Result<(), Error> {
         match event {
             Event::Created => self.on_created(),

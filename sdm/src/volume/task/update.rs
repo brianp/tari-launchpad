@@ -1,9 +1,9 @@
 use anyhow::Error;
 
 use super::{Status, VolumeTask};
-use crate::{config::ManagedConfig, task::TaskContext};
+use crate::{config::ManagedProtocol, task::TaskContext};
 
-impl<C: ManagedConfig> TaskContext<VolumeTask<C>> {
+impl<C: ManagedProtocol> TaskContext<VolumeTask<C>> {
     pub async fn process_update_impl(&mut self) -> Result<(), Error> {
         match self.status.get() {
             Status::InitialState => self.do_initial_state().await,

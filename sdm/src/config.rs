@@ -1,3 +1,5 @@
 use std::fmt;
 
-pub trait ManagedConfig: fmt::Debug + Sync + Send + 'static {}
+pub trait ManagedProtocol: fmt::Debug + Sync + Send + 'static {
+    type Config: fmt::Debug + Sync + Send + 'static;
+}

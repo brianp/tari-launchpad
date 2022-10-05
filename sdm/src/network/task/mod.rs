@@ -7,19 +7,19 @@ use async_trait::async_trait;
 
 use super::ManagedNetwork;
 use crate::{
-    config::ManagedConfig,
+    config::ManagedProtocol,
     error::ParseError,
     task::{RunnableContext, RunnableTask, TaskContext, TaskEvent, TaskStatus},
     utils::TaskGuard,
 };
 
-pub struct NetworkTask<C: ManagedConfig> {
+pub struct NetworkTask<C: ManagedProtocol> {
     network: Box<dyn ManagedNetwork<Config = C>>,
     events: Option<TaskGuard<()>>,
     network_name: String,
 }
 
-impl<C: ManagedConfig> NetworkTask<C> {
+impl<C: ManagedProtocol> NetworkTask<C> {
     pub fn new(scope: &str, network: Box<dyn ManagedNetwork<Config = C>>) -> Self {
         let network_name = format!("{}_{}", scope, network.network_name());
         Self {
@@ -31,7 +31,7 @@ impl<C: ManagedConfig> NetworkTask<C> {
 }
 
 #[async_trait]
-impl<C: ManagedConfig> RunnableTask for NetworkTask<C> {
+impl<C: ManagedProtocol> RunnableTask for NetworkTask<C> {
     type Config = C;
     type Event = Event;
     type Status = Status;
@@ -42,7 +42,7 @@ impl<C: ManagedConfig> RunnableTask for NetworkTask<C> {
 }
 
 #[async_trait]
-impl<C: ManagedConfig> RunnableContext<NetworkTask<C>> for TaskContext<NetworkTask<C>> {
+impl<C: ManagedProtocol> RunnableContext<NetworkTask<C>> for TaskContext<NetworkTask<C>> {
     async fn initialize(&mut self) {
         self.subscribe_to_events();
     }

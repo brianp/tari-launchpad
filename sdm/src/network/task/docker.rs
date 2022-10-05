@@ -10,12 +10,12 @@ use futures::TryStreamExt;
 
 use super::{Event, NetworkTask};
 use crate::{
-    config::ManagedConfig,
+    config::ManagedProtocol,
     forwarder::{Converter, Forwarder},
     task::TaskContext,
 };
 
-impl<C: ManagedConfig> TaskContext<NetworkTask<C>> {
+impl<C: ManagedProtocol> TaskContext<NetworkTask<C>> {
     pub fn subscribe_to_events(&mut self) {
         let mut type_filter = HashMap::new();
         type_filter.insert("type".to_string(), vec!["network".to_string()]);

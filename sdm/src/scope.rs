@@ -5,7 +5,7 @@ use bollard::Docker;
 use tokio::sync::broadcast;
 
 use crate::{
-    config::ManagedConfig,
+    config::ManagedProtocol,
     ids::{ManagedTask, TaskId},
     image::{ImageTask, ManagedContainer},
     network::{ManagedNetwork, NetworkTask},
@@ -13,7 +13,7 @@ use crate::{
     volume::{ManagedVolume, VolumeTask},
 };
 
-pub struct SdmScope<C: ManagedConfig> {
+pub struct SdmScope<C: ManagedProtocol> {
     scope: String,
     docker: Docker,
     sender: broadcast::Sender<ControlEvent<C>>,
@@ -21,13 +21,13 @@ pub struct SdmScope<C: ManagedConfig> {
 
 // TODO: Move to the `task` mod?
 #[derive(Debug)]
-pub enum ControlEvent<C: ManagedConfig> {
+pub enum ControlEvent<C: ManagedProtocol> {
     SetConfig(Option<Arc<C>>),
     ResourceReady { task_id: TaskId, name: String },
     ResourceClosed { task_id: TaskId },
 }
 
-impl<C: ManagedConfig> Clone for ControlEvent<C> {
+impl<C: ManagedProtocol> Clone for ControlEvent<C> {
     fn clone(&self) -> Self {
         match self {
             Self::SetConfig(config) => Self::SetConfig(config.clone()),
@@ -42,7 +42,7 @@ impl<C: ManagedConfig> Clone for ControlEvent<C> {
     }
 }
 
-impl<C: ManagedConfig> SdmScope<C> {
+impl<C: ManagedProtocol> SdmScope<C> {
     pub fn connect(scope: &str) -> Result<Self, Error> {
         let docker = Docker::connect_with_local_defaults()?;
         // TODO: Use `rx` later to control entries

@@ -7,13 +7,13 @@ use async_trait::async_trait;
 
 use super::{checker::CheckerEvent, ManagedContainer};
 use crate::{
-    config::ManagedConfig,
+    config::ManagedProtocol,
     error::ParseError,
     task::{RunnableContext, RunnableTask, TaskContext, TaskEvent, TaskStatus},
     utils::TaskGuard,
 };
 
-pub struct ImageTask<C: ManagedConfig> {
+pub struct ImageTask<C: ManagedProtocol> {
     events: Option<TaskGuard<()>>,
     container_name: String,
     // TODO: Rename to `fqdn`
@@ -21,7 +21,7 @@ pub struct ImageTask<C: ManagedConfig> {
     image: Box<dyn ManagedContainer<Config = C>>,
 }
 
-impl<C: ManagedConfig> ImageTask<C> {
+impl<C: ManagedProtocol> ImageTask<C> {
     pub fn new(scope: &str, image: Box<dyn ManagedContainer<Config = C>>) -> Self {
         // let required = image.deps().into_iter().collect();
         let image_name = format!("{}/{}:{}", image.registry(), image.image_name(), image.tag());
@@ -36,7 +36,7 @@ impl<C: ManagedConfig> ImageTask<C> {
 }
 
 #[async_trait]
-impl<C: ManagedConfig> RunnableTask for ImageTask<C> {
+impl<C: ManagedProtocol> RunnableTask for ImageTask<C> {
     type Config = C;
     type Event = Event;
     type Status = Status;
@@ -47,7 +47,7 @@ impl<C: ManagedConfig> RunnableTask for ImageTask<C> {
 }
 
 #[async_trait]
-impl<C: ManagedConfig> RunnableContext<ImageTask<C>> for TaskContext<ImageTask<C>> {
+impl<C: ManagedProtocol> RunnableContext<ImageTask<C>> for TaskContext<ImageTask<C>> {
     async fn initialize(&mut self) {
         self.subscribe_to_events();
     }

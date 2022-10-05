@@ -32,7 +32,7 @@ use futures::{StreamExt, TryStreamExt};
 
 use super::{ContainerState, Event, ImageTask};
 use crate::{
-    config::ManagedConfig,
+    config::ManagedProtocol,
     forwarder::{Converter, Forwarder},
     image::{
         checker::{Logs, Stats},
@@ -50,7 +50,7 @@ use crate::{
 
 // TODO: Methods could be moved to `TaskContext` or `ScopedDockerDriver`
 // Container management
-impl<C: ManagedConfig> TaskContext<ImageTask<C>> {
+impl<C: ManagedProtocol> TaskContext<ImageTask<C>> {
     pub fn subscribe_to_events(&mut self) {
         let mut type_filter = HashMap::new();
         type_filter.insert("type".to_string(), vec!["container".to_string()]);

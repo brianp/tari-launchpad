@@ -1,9 +1,9 @@
 use anyhow::Error;
 
 use super::{NetworkTask, Status};
-use crate::{config::ManagedConfig, task::TaskContext};
+use crate::{config::ManagedProtocol, task::TaskContext};
 
-impl<C: ManagedConfig> TaskContext<NetworkTask<C>> {
+impl<C: ManagedProtocol> TaskContext<NetworkTask<C>> {
     pub async fn process_update_impl(&mut self) -> Result<(), Error> {
         match self.status.get() {
             Status::InitialState => self.do_initial_state().await,

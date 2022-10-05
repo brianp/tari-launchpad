@@ -1,9 +1,9 @@
 use anyhow::Error;
 
 use super::{Event, NetworkTask, Status};
-use crate::{config::ManagedConfig, task::TaskContext};
+use crate::{config::ManagedProtocol, task::TaskContext};
 
-impl<C: ManagedConfig> TaskContext<NetworkTask<C>> {
+impl<C: ManagedProtocol> TaskContext<NetworkTask<C>> {
     pub fn process_event_impl(&mut self, event: Event) -> Result<(), Error> {
         match event {
             Event::Created => self.on_created(),

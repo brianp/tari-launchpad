@@ -6,10 +6,10 @@ use std::fmt;
 use checker::{ContainerChecker, ReadyIfStarted};
 pub(crate) use task::ImageTask;
 
-use crate::{config::ManagedConfig, ids::TaskId};
+use crate::{config::ManagedProtocol, ids::TaskId};
 
 pub trait ManagedContainer: fmt::Debug + Send + 'static {
-    type Config: ManagedConfig;
+    type Config: ManagedProtocol;
 
     fn checker(&mut self) -> Box<dyn ContainerChecker> {
         Box::new(ReadyIfStarted)

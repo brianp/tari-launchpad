@@ -7,20 +7,20 @@ use async_trait::async_trait;
 
 use super::ManagedVolume;
 use crate::{
-    config::ManagedConfig,
+    config::ManagedProtocol,
     error::ParseError,
     task::{RunnableContext, RunnableTask, TaskContext, TaskEvent, TaskStatus},
     utils::TaskGuard,
 };
 
-pub struct VolumeTask<C: ManagedConfig> {
+pub struct VolumeTask<C: ManagedProtocol> {
     events: Option<TaskGuard<()>>,
     volume: Box<dyn ManagedVolume<Config = C>>,
 
     volume_name: String,
 }
 
-impl<C: ManagedConfig> VolumeTask<C> {
+impl<C: ManagedProtocol> VolumeTask<C> {
     pub fn new(scope: &str, volume: Box<dyn ManagedVolume<Config = C>>) -> Self {
         let volume_name = format!("{}_{}", scope, volume.volume_name());
         Self {
@@ -32,7 +32,7 @@ impl<C: ManagedConfig> VolumeTask<C> {
 }
 
 #[async_trait]
-impl<C: ManagedConfig> RunnableTask for VolumeTask<C> {
+impl<C: ManagedProtocol> RunnableTask for VolumeTask<C> {
     type Config = C;
     type Event = Event;
     type Status = Status;
@@ -43,7 +43,7 @@ impl<C: ManagedConfig> RunnableTask for VolumeTask<C> {
 }
 
 #[async_trait]
-impl<C: ManagedConfig> RunnableContext<VolumeTask<C>> for TaskContext<VolumeTask<C>> {
+impl<C: ManagedProtocol> RunnableContext<VolumeTask<C>> for TaskContext<VolumeTask<C>> {
     async fn initialize(&mut self) {
         self.subscribe_to_events();
     }

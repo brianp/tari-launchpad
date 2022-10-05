@@ -25,7 +25,7 @@ use std::{path::PathBuf, time::Duration};
 
 use derivative::Derivative;
 use serde::{Deserialize, Serialize};
-use tari_sdm::{config::ManagedConfig, image::Envs};
+use tari_sdm::{config::ManagedProtocol, image::Envs};
 use tari_utilities::Hidden;
 use thiserror::Error;
 
@@ -151,7 +151,9 @@ pub struct LaunchpadConfig {
     pub with_monitoring: bool,
 }
 
-impl ManagedConfig for LaunchpadConfig {}
+impl ManagedProtocol for LaunchpadConfig {
+    type Config = Self;
+}
 
 #[derive(Debug)]
 pub struct ConnectionSettings {
