@@ -129,6 +129,7 @@ impl ContainerChecker for Checker {
         self.progress.update(response);
         let info = self.progress.progress_info();
         log::warn!("PROGRESS: {:?}", info);
+        println!("!PROGRESS={}", info.block_progress);
         ctx.send(CheckerEvent::Progress(info.block_progress as u8)).ok();
         if done {
             ctx.send(CheckerEvent::Ready).ok();

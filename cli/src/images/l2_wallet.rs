@@ -1,11 +1,12 @@
 use tari_sdm::{
     ids::{ManagedTask, TaskId},
-    image::{Args, Envs, ManagedContainer, Ports, Volumes},
+    image::{Args, Envs, ManagedContainer, Mounts, Ports, Volumes},
 };
 
 use super::{TariBaseNode, DEFAULT_REGISTRY, GENERAL_VOLUME};
 use crate::{
     config::{ConnectionSettings, LaunchpadConfig},
+    images::{BLOCKCHAIN_PATH, VAR_TARI_PATH},
     networks::LocalNet,
     volumes::SharedVolume,
 };
@@ -61,7 +62,7 @@ impl ManagedContainer for TariWallet {
         if let Some(settings) = self.settings.as_ref() {
             settings.add_common(envs);
             settings.add_tor(envs);
-            envs.set("WAIT_FOR_TOR", 10);
+            envs.set("WAIT_FOR_TOR", 0);
             envs.set(
                 "TARI_BASE_NODE__DATA_DIR",
                 format!("/blockchain/{}", settings.tari_network.lower_case()),
@@ -80,5 +81,13 @@ impl ManagedContainer for TariWallet {
 
     fn volumes(&self, volumes: &mut Volumes) {
         volumes.add(GENERAL_VOLUME);
+    }
+
+    fn mounts(&self, mounts: &mut Mounts) {
+        if let Some(settings) = self.settings.as_ref() {
+            // TODO: Avoid using display here
+            mounts.bind_path(settings.data_directory.display(), VAR_TARI_PATH);
+            mounts.add_volume(SharedVolume::id(), BLOCKCHAIN_PATH);
+        }
     }
 }
