@@ -14,6 +14,8 @@ use super::task::Event;
 
 #[derive(Debug)]
 pub enum CheckerEvent {
+    // TODO: Add starging to progress
+    // Progress { stages: 10, current_stage: 1, progress: 57 (pct), desc: "Syncing..." },
     // Progress in percents
     Progress(u8),
     Ready,

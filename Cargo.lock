@@ -5038,6 +5038,7 @@ dependencies = [
  "rand 0.8.5",
  "regex",
  "serde",
+ "tari_app_grpc 0.38.5",
  "tari_base_node_grpc_client",
  "tari_common_types 0.38.5",
  "tari_sdm",

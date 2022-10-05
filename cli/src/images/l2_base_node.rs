@@ -15,7 +15,15 @@ use tari_sdm::{
     },
 };
 
-use super::{Tor, BLOCKCHAIN_PATH, BLOCKCHAIN_VOLUME, DEFAULT_REGISTRY, GENERAL_VOLUME, VAR_TARI_PATH};
+use super::{
+    sync_progress::SyncProgress,
+    Tor,
+    BLOCKCHAIN_PATH,
+    BLOCKCHAIN_VOLUME,
+    DEFAULT_REGISTRY,
+    GENERAL_VOLUME,
+    VAR_TARI_PATH,
+};
 use crate::{
     config::{ConnectionSettings, LaunchpadConfig},
     networks::LocalNet,
@@ -99,11 +107,14 @@ impl ManagedContainer for TariBaseNode {
     }
 }
 
-pub struct Checker {}
+pub struct Checker {
+    progress: SyncProgress,
+}
 
 impl Checker {
     fn new() -> Self {
-        Self {}
+        let progress = SyncProgress::new(0, 100);
+        Self { progress }
     }
 }
 
@@ -112,14 +123,23 @@ impl ContainerChecker for Checker {
     async fn on_interval(&mut self, ctx: &mut CheckerContext) -> Result<(), Error> {
         // TODO: Keep the client
         let mut client = BaseNodeGrpcClient::connect("http://127.0.0.1:18142").await?;
-        let progress = client.get_sync_progress(grpc::Empty {}).await?.into_inner();
-        let current = progress.local_height;
-        let total = progress.tip_height;
-        let pct = current as f32 / total as f32 * 100.0;
-        ctx.send(CheckerEvent::Progress(pct as u8)).ok();
-        if current == total && total != 0 {
+        let response = client.get_sync_progress(grpc::Empty {}).await?.into_inner();
+        log::trace!("Sync progress: {:?}", response);
+        let done = matches!(response.state(), tari_app_grpc::tari_rpc::SyncState::Done);
+        self.progress.update(response);
+        let info = self.progress.progress_info();
+        log::warn!("PROGRESS: {:?}", info);
+        ctx.send(CheckerEvent::Progress(info.block_progress as u8)).ok();
+        if done {
             ctx.send(CheckerEvent::Ready).ok();
         }
+        // let current = progress.local_height;
+        // let total = progress.tip_height;
+        // let pct = current as f32 / total as f32 * 100.0;
+        // ctx.send(CheckerEvent::Progress(pct as u8)).ok();
+        // if current == total && total != 0 {
+        // ctx.send(CheckerEvent::Ready).ok();
+        // }
         Ok(())
     }
 }

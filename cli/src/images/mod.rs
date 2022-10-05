@@ -5,6 +5,7 @@ mod l3_miner;
 mod l8_grafana;
 mod l8_loki;
 mod l8_promtail;
+mod sync_progress;
 
 pub use l1_tor::Tor;
 pub use l2_base_node::TariBaseNode;

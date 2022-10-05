@@ -123,7 +123,7 @@ where TaskContext<R>: RunnableContext<R>
         loop {
             select! {
                 _ = sleep(interval) => {
-                    log::trace!("Checking the scope by interval");
+                    // log::trace!("Checking the scope by interval");
                 }
                 event = events.next() => {
                     if let Some(event) = event {
