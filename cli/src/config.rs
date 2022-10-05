@@ -52,7 +52,7 @@ pub struct WalletConfig {
     /// The password to de/en-crypt the wallet database
     #[serde(skip_serializing)]
     #[derivative(Debug = "ignore")]
-    pub password: String,
+    pub password: Hidden<String>,
 }
 
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
@@ -158,6 +158,7 @@ pub struct ConnectionSettings {
     pub tor_password: Hidden<String>,
     pub tari_network: TariNetwork,
     pub data_directory: PathBuf,
+    pub wallet_password: Hidden<String>,
 }
 
 impl<'a> From<&'a LaunchpadConfig> for ConnectionSettings {
@@ -166,6 +167,7 @@ impl<'a> From<&'a LaunchpadConfig> for ConnectionSettings {
             tor_password: config.tor_control_password.clone(),
             tari_network: config.tari_network,
             data_directory: config.data_directory.clone(),
+            wallet_password: config.wallet.clone().unwrap_or_else(|| { WalletConfig::default() }).password,
         }
     }
 }
