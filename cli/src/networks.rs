@@ -3,7 +3,7 @@ use tari_sdm::{
     network::ManagedNetwork,
 };
 
-use crate::LaunchpadConfig;
+use crate::config::{LaunchpadConfig, LaunchpadProtocol};
 
 #[derive(Debug, Default)]
 pub struct LocalNet {}
@@ -15,7 +15,7 @@ impl ManagedTask for LocalNet {
 }
 
 impl ManagedNetwork for LocalNet {
-    type Config = LaunchpadConfig;
+    type Protocol = LaunchpadProtocol;
 
     fn network_name(&self) -> &str {
         "network"

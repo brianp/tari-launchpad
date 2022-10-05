@@ -4,7 +4,7 @@ use tari_sdm::{
 };
 
 use super::{TariBaseNode, TariWallet, DEFAULT_REGISTRY, GENERAL_VOLUME};
-use crate::config::LaunchpadConfig;
+use crate::config::{LaunchpadConfig, LaunchpadProtocol};
 
 #[derive(Debug)]
 pub struct TariSha3Miner;
@@ -20,7 +20,7 @@ impl ManagedTask for TariSha3Miner {
 }
 
 impl ManagedContainer for TariSha3Miner {
-    type Config = LaunchpadConfig;
+    type Protocol = LaunchpadProtocol;
 
     fn registry(&self) -> &str {
         DEFAULT_REGISTRY

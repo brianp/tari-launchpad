@@ -151,8 +151,11 @@ pub struct LaunchpadConfig {
     pub with_monitoring: bool,
 }
 
-impl ManagedProtocol for LaunchpadConfig {
-    type Config = Self;
+#[derive(Debug)]
+pub struct LaunchpadProtocol;
+
+impl ManagedProtocol for LaunchpadProtocol {
+    type Config = LaunchpadConfig;
 }
 
 #[derive(Debug)]

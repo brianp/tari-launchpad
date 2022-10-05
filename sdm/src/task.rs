@@ -27,7 +27,7 @@ pub trait TaskStatus: fmt::Debug + Default + Send {
 
 #[async_trait]
 pub trait RunnableTask: Sized + Send + 'static {
-    type Config: ManagedProtocol;
+    type Protocol: ManagedProtocol;
     type Status: TaskStatus;
     type Event: TaskEvent;
 
@@ -38,7 +38,7 @@ pub trait RunnableTask: Sized + Send + 'static {
 pub trait RunnableContext<T: RunnableTask> {
     /// Subscribe to events here
     async fn initialize(&mut self);
-    fn reconfigure(&mut self, config: Option<&T::Config>) -> bool;
+    fn reconfigure(&mut self, config: Option<&<T::Protocol as ManagedProtocol>::Config>) -> bool;
     fn process_event(&mut self, event: T::Event) -> Result<(), Error>;
     async fn update(&mut self) -> Result<(), Error>;
 }
@@ -72,8 +72,8 @@ impl<T: RunnableTask> TaskContext<T> {
 pub struct SdmTaskRunner<R: RunnableTask> {
     task_id: TaskId,
     events_receiver: Option<mpsc::UnboundedReceiver<R::Event>>,
-    requests_receiver: Option<broadcast::Receiver<ControlEvent<R::Config>>>,
-    requests_sender: broadcast::Sender<ControlEvent<R::Config>>,
+    requests_receiver: Option<broadcast::Receiver<ControlEvent<R::Protocol>>>,
+    requests_sender: broadcast::Sender<ControlEvent<R::Protocol>>,
 
     context: TaskContext<R>,
     next_update: Instant,
@@ -85,7 +85,7 @@ pub struct SdmTaskRunner<R: RunnableTask> {
 impl<R: RunnableTask> SdmTaskRunner<R>
 where TaskContext<R>: RunnableContext<R>
 {
-    pub fn new<M: ManagedTask>(sender: broadcast::Sender<ControlEvent<R::Config>>, inner: R, docker: Docker) -> Self {
+    pub fn new<M: ManagedTask>(sender: broadcast::Sender<ControlEvent<R::Protocol>>, inner: R, docker: Docker) -> Self {
         let (event_tx, event_rx) = mpsc::unbounded_channel();
         let context = TaskContext {
             dependencies_ready: false,
@@ -168,13 +168,13 @@ where TaskContext<R>: RunnableContext<R>
         }
     }
 
-    fn broadcast(&mut self, event: ControlEvent<R::Config>) {
+    fn broadcast(&mut self, event: ControlEvent<R::Protocol>) {
         if let Err(err) = self.requests_sender.send(event) {
             log::error!("Can't brodcast event: {:?}", err);
         }
     }
 
-    fn process_request(&mut self, req: ControlEvent<R::Config>) {
+    fn process_request(&mut self, req: ControlEvent<R::Protocol>) {
         match req {
             ControlEvent::SetConfig(config) => {
                 let config = config.as_ref().map(Deref::deref);
@@ -208,7 +208,7 @@ where TaskContext<R>: RunnableContext<R>
         self.context.initialize().await;
     }
 
-    pub fn reconfigure(&mut self, config: Option<&R::Config>) {
+    pub fn reconfigure(&mut self, config: Option<&<R::Protocol as ManagedProtocol>::Config>) {
         let active = self.context.reconfigure(config);
         self.context.should_start = active;
     }

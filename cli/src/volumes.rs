@@ -3,7 +3,7 @@ use tari_sdm::{
     volume::ManagedVolume,
 };
 
-use crate::LaunchpadConfig;
+use crate::config::{LaunchpadConfig, LaunchpadProtocol};
 
 #[derive(Debug, Default)]
 pub struct SharedVolume {}
@@ -15,13 +15,13 @@ impl ManagedTask for SharedVolume {
 }
 
 impl ManagedVolume for SharedVolume {
-    type Config = LaunchpadConfig;
+    type Protocol = LaunchpadProtocol;
 
     fn volume_name(&self) -> &str {
         "volume"
     }
 
-    fn reconfigure(&mut self, _config: Option<&Self::Config>) -> bool {
+    fn reconfigure(&mut self, _config: Option<&LaunchpadConfig>) -> bool {
         true
     }
 }

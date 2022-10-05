@@ -25,7 +25,7 @@ use super::{
     VAR_TARI_PATH,
 };
 use crate::{
-    config::{ConnectionSettings, LaunchpadConfig},
+    config::{ConnectionSettings, LaunchpadConfig, LaunchpadProtocol},
     networks::LocalNet,
     volumes::SharedVolume,
 };
@@ -46,7 +46,7 @@ impl ManagedTask for TariBaseNode {
 }
 
 impl ManagedContainer for TariBaseNode {
-    type Config = LaunchpadConfig;
+    type Protocol = LaunchpadProtocol;
 
     fn registry(&self) -> &str {
         DEFAULT_REGISTRY
@@ -56,7 +56,7 @@ impl ManagedContainer for TariBaseNode {
         "tari_base_node"
     }
 
-    fn reconfigure(&mut self, config: Option<&Self::Config>) -> bool {
+    fn reconfigure(&mut self, config: Option<&LaunchpadConfig>) -> bool {
         self.settings = config.map(ConnectionSettings::from);
         self.settings.is_some()
     }

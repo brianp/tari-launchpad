@@ -15,13 +15,13 @@ use crate::{
 
 pub struct VolumeTask<C: ManagedProtocol> {
     events: Option<TaskGuard<()>>,
-    volume: Box<dyn ManagedVolume<Config = C>>,
+    volume: Box<dyn ManagedVolume<Protocol = C>>,
 
     volume_name: String,
 }
 
 impl<C: ManagedProtocol> VolumeTask<C> {
-    pub fn new(scope: &str, volume: Box<dyn ManagedVolume<Config = C>>) -> Self {
+    pub fn new(scope: &str, volume: Box<dyn ManagedVolume<Protocol = C>>) -> Self {
         let volume_name = format!("{}_{}", scope, volume.volume_name());
         Self {
             events: None,
@@ -33,8 +33,8 @@ impl<C: ManagedProtocol> VolumeTask<C> {
 
 #[async_trait]
 impl<C: ManagedProtocol> RunnableTask for VolumeTask<C> {
-    type Config = C;
     type Event = Event;
+    type Protocol = C;
     type Status = Status;
 
     fn name(&self) -> &str {
@@ -48,7 +48,7 @@ impl<C: ManagedProtocol> RunnableContext<VolumeTask<C>> for TaskContext<VolumeTa
         self.subscribe_to_events();
     }
 
-    fn reconfigure(&mut self, config: Option<&C>) -> bool {
+    fn reconfigure(&mut self, config: Option<&C::Config>) -> bool {
         self.inner.volume.reconfigure(config)
     }
 

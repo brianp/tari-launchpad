@@ -4,7 +4,7 @@ use tari_sdm::{
 };
 
 use super::GRAFANA_REGISTRY;
-use crate::config::LaunchpadConfig;
+use crate::config::{LaunchpadConfig, LaunchpadProtocol};
 
 #[derive(Debug, Default)]
 pub struct Loki;
@@ -16,7 +16,7 @@ impl ManagedTask for Loki {
 }
 
 impl ManagedContainer for Loki {
-    type Config = LaunchpadConfig;
+    type Protocol = LaunchpadProtocol;
 
     fn registry(&self) -> &str {
         GRAFANA_REGISTRY
@@ -34,7 +34,7 @@ impl ManagedContainer for Loki {
         ports.add(18_310);
     }
 
-    fn reconfigure(&mut self, config: Option<&Self::Config>) -> bool {
+    fn reconfigure(&mut self, config: Option<&LaunchpadConfig>) -> bool {
         config.map(|conf| conf.with_monitoring).unwrap_or_default()
     }
 }

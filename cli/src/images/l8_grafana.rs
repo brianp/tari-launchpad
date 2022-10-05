@@ -4,7 +4,7 @@ use tari_sdm::{
 };
 
 use super::GRAFANA_REGISTRY;
-use crate::config::{ConnectionSettings, LaunchpadConfig};
+use crate::config::{ConnectionSettings, LaunchpadConfig, LaunchpadProtocol};
 
 #[derive(Debug, Default)]
 pub struct Grafana {
@@ -18,7 +18,7 @@ impl ManagedTask for Grafana {
 }
 
 impl ManagedContainer for Grafana {
-    type Config = LaunchpadConfig;
+    type Protocol = LaunchpadProtocol;
 
     fn registry(&self) -> &str {
         GRAFANA_REGISTRY
@@ -49,7 +49,7 @@ impl ManagedContainer for Grafana {
         ports.add(18_300);
     }
 
-    fn reconfigure(&mut self, config: Option<&Self::Config>) -> bool {
+    fn reconfigure(&mut self, config: Option<&LaunchpadConfig>) -> bool {
         config.map(|conf| conf.with_monitoring).unwrap_or_default()
     }
 }

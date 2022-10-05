@@ -14,13 +14,13 @@ use crate::{
 };
 
 pub struct NetworkTask<C: ManagedProtocol> {
-    network: Box<dyn ManagedNetwork<Config = C>>,
+    network: Box<dyn ManagedNetwork<Protocol = C>>,
     events: Option<TaskGuard<()>>,
     network_name: String,
 }
 
 impl<C: ManagedProtocol> NetworkTask<C> {
-    pub fn new(scope: &str, network: Box<dyn ManagedNetwork<Config = C>>) -> Self {
+    pub fn new(scope: &str, network: Box<dyn ManagedNetwork<Protocol = C>>) -> Self {
         let network_name = format!("{}_{}", scope, network.network_name());
         Self {
             network,
@@ -32,8 +32,8 @@ impl<C: ManagedProtocol> NetworkTask<C> {
 
 #[async_trait]
 impl<C: ManagedProtocol> RunnableTask for NetworkTask<C> {
-    type Config = C;
     type Event = Event;
+    type Protocol = C;
     type Status = Status;
 
     fn name(&self) -> &str {
@@ -47,7 +47,7 @@ impl<C: ManagedProtocol> RunnableContext<NetworkTask<C>> for TaskContext<Network
         self.subscribe_to_events();
     }
 
-    fn reconfigure(&mut self, config: Option<&C>) -> bool {
+    fn reconfigure(&mut self, config: Option<&C::Config>) -> bool {
         self.inner.network.reconfigure(config)
     }
 

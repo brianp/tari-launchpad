@@ -5,7 +5,7 @@ use tari_sdm::{
 
 use super::{TariBaseNode, DEFAULT_REGISTRY, GENERAL_VOLUME};
 use crate::{
-    config::{ConnectionSettings, LaunchpadConfig},
+    config::{ConnectionSettings, LaunchpadConfig, LaunchpadProtocol},
     images::{BLOCKCHAIN_PATH, VAR_TARI_PATH},
     networks::LocalNet,
     volumes::SharedVolume,
@@ -27,7 +27,7 @@ impl ManagedTask for TariWallet {
 }
 
 impl ManagedContainer for TariWallet {
-    type Config = LaunchpadConfig;
+    type Protocol = LaunchpadProtocol;
 
     fn registry(&self) -> &str {
         DEFAULT_REGISTRY
@@ -37,7 +37,7 @@ impl ManagedContainer for TariWallet {
         "tari_wallet"
     }
 
-    fn reconfigure(&mut self, config: Option<&Self::Config>) -> bool {
+    fn reconfigure(&mut self, config: Option<&LaunchpadConfig>) -> bool {
         self.settings = config.map(ConnectionSettings::from);
         self.settings.is_some()
     }

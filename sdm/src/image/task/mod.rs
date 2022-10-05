@@ -18,11 +18,11 @@ pub struct ImageTask<C: ManagedProtocol> {
     container_name: String,
     // TODO: Rename to `fqdn`
     image_name: String,
-    image: Box<dyn ManagedContainer<Config = C>>,
+    image: Box<dyn ManagedContainer<Protocol = C>>,
 }
 
 impl<C: ManagedProtocol> ImageTask<C> {
-    pub fn new(scope: &str, image: Box<dyn ManagedContainer<Config = C>>) -> Self {
+    pub fn new(scope: &str, image: Box<dyn ManagedContainer<Protocol = C>>) -> Self {
         // let required = image.deps().into_iter().collect();
         let image_name = format!("{}/{}:{}", image.registry(), image.image_name(), image.tag());
         let container_name = format!("{}_{}", scope, image.image_name());
@@ -37,8 +37,8 @@ impl<C: ManagedProtocol> ImageTask<C> {
 
 #[async_trait]
 impl<C: ManagedProtocol> RunnableTask for ImageTask<C> {
-    type Config = C;
     type Event = Event;
+    type Protocol = C;
     type Status = Status;
 
     fn name(&self) -> &str {
@@ -52,7 +52,7 @@ impl<C: ManagedProtocol> RunnableContext<ImageTask<C>> for TaskContext<ImageTask
         self.subscribe_to_events();
     }
 
-    fn reconfigure(&mut self, config: Option<&C>) -> bool {
+    fn reconfigure(&mut self, config: Option<&C::Config>) -> bool {
         self.inner.image.reconfigure(config)
     }
 

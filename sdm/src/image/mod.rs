@@ -9,14 +9,14 @@ pub(crate) use task::ImageTask;
 use crate::{config::ManagedProtocol, ids::TaskId};
 
 pub trait ManagedContainer: fmt::Debug + Send + 'static {
-    type Config: ManagedProtocol;
+    type Protocol: ManagedProtocol;
 
     fn checker(&mut self) -> Box<dyn ContainerChecker> {
         Box::new(ReadyIfStarted)
     }
 
     /// Reconfigures the task and return a flag should the container be active?
-    fn reconfigure(&mut self, config: Option<&Self::Config>) -> bool {
+    fn reconfigure(&mut self, config: Option<&<Self::Protocol as ManagedProtocol>::Config>) -> bool {
         // Start if config exists
         config.is_some()
     }
