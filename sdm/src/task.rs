@@ -51,7 +51,12 @@ pub struct TaskContext<T: RunnableTask> {
     /// Depends on the config
     should_start: bool,
     pub status: SdmStatus<T::Status>,
+
+    // TODO: Join both into the single struct
+    // TODO: Hide with `send` method
     pub sender: mpsc::UnboundedSender<T::Event>,
+    pub requests_sender: broadcast::Sender<ControlEvent<T::Protocol>>,
+
     pub driver: Docker,
 
     #[deref]
@@ -85,7 +90,7 @@ pub struct SdmTaskRunner<R: RunnableTask> {
 impl<R: RunnableTask> SdmTaskRunner<R>
 where TaskContext<R>: RunnableContext<R>
 {
-    pub fn new<M: ManagedTask>(sender: broadcast::Sender<ControlEvent<R::Protocol>>, inner: R, docker: Docker) -> Self {
+    pub fn new<M: ManagedTask>(req_tx: broadcast::Sender<ControlEvent<R::Protocol>>, inner: R, docker: Docker) -> Self {
         let (event_tx, event_rx) = mpsc::unbounded_channel();
         let context = TaskContext {
             dependencies_ready: false,
@@ -93,18 +98,19 @@ where TaskContext<R>: RunnableContext<R>
             should_start: false,
             status: SdmStatus::new(inner.name().to_string()),
             sender: event_tx,
+            requests_sender: req_tx.clone(),
             driver: docker,
             inner,
         };
         // It subscribed here to avoid the gap if
         // that will subscribe in the routine.
-        let req_rx = sender.subscribe();
+        let req_rx = req_tx.subscribe();
         let dependencies = M::deps().into_iter().map(|id| (id, false)).collect();
         Self {
             task_id: M::id(),
             events_receiver: Some(event_rx),
             requests_receiver: Some(req_rx),
-            requests_sender: sender,
+            requests_sender: req_tx,
             context,
             next_update: Instant::now(),
             dependencies,

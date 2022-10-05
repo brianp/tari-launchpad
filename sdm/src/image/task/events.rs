@@ -40,6 +40,7 @@ impl<C: ManagedProtocol> TaskContext<ImageTask<C>> {
             let logs = self.logs_stream();
             // let stats = self.stats_stream();
             let sender = self.sender.clone();
+            let req_sender = self.requests_sender.clone();
             let context = CheckerContext::new(logs, sender);
             let fur = checker.entrypoint(context);
             let checker = tokio::spawn(fur).into();
