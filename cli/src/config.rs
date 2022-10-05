@@ -167,7 +167,11 @@ impl<'a> From<&'a LaunchpadConfig> for ConnectionSettings {
             tor_password: config.tor_control_password.clone(),
             tari_network: config.tari_network,
             data_directory: config.data_directory.clone(),
-            wallet_password: config.wallet.clone().unwrap_or_else(|| { WalletConfig::default() }).password,
+            wallet_password: config
+                .wallet
+                .clone()
+                .unwrap_or_else(|| WalletConfig::default())
+                .password,
         }
     }
 }

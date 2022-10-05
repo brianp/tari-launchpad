@@ -1,8 +1,7 @@
 use tari_sdm::{
     ids::{ManagedTask, TaskId},
-    image::{ManagedContainer, Ports, Volumes},
+    image::{Args, Envs, ManagedContainer, Ports, Volumes},
 };
-use tari_sdm::image::{Args, Envs};
 
 use super::{TariBaseNode, DEFAULT_REGISTRY, GENERAL_VOLUME};
 use crate::{
@@ -48,14 +47,13 @@ impl ManagedContainer for TariWallet {
     }
 
     fn args(&self, args: &mut Args) {
-        self.
         args.set("--log-config", "/var/tari/config/log4rs.yml");
         args.set("--seed-words-file", "/var/tari/config/seed_words.txt");
         args.flag("--enable-grpc");
         args.flag("-n");
 
         if let Some(settings) = self.settings.as_ref() {
-            args.set("-p", format!("wallet.custom_base_node={}::{}", "hi","hi"));
+            args.set("-p", format!("wallet.custom_base_node={}::{}", "hi", "hi"));
         }
     }
 
@@ -69,7 +67,10 @@ impl ManagedContainer for TariWallet {
                 format!("/blockchain/{}", settings.tari_network.lower_case()),
             );
             envs.set("TARI_WALLET_PASSWORD", &settings.wallet_password); // HERE
-            envs.set("TARI_WALLET__P2P__TRANSPORT__TOR__CONTROL_AUTH", format!("password={}", &settings.tor_password));
+            envs.set(
+                "TARI_WALLET__P2P__TRANSPORT__TOR__CONTROL_AUTH",
+                format!("password={}", &settings.tor_password),
+            );
         }
         envs.set("SHELL", "/bin/bash");
         envs.set("TERM", "linux");
