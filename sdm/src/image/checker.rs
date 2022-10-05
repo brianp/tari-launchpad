@@ -32,6 +32,7 @@ impl CheckerContext {
         Self { logs, sender }
     }
 
+    // TODO: Remove it
     pub fn send(&self, event: CheckerEvent) -> Result<(), Error> {
         let event = Event::CheckerEvent(event);
         self.sender

@@ -43,6 +43,26 @@ pub trait RunnableContext<T: RunnableTask> {
     async fn update(&mut self) -> Result<(), Error>;
 }
 
+pub struct TaskSender<E, P: ManagedProtocol> {
+    event_tx: mpsc::UnboundedSender<E>,
+    req_tx: broadcast::Sender<ControlEvent<P>>,
+}
+
+impl<E, P: ManagedProtocol> TaskSender<E, P> {
+    pub fn send_direct(&self, event: E) -> Result<(), Error> {
+        self.event_tx
+            .send(event)
+            .map_err(|_| Error::msg("Can't send a direct message"))
+    }
+
+    pub fn send_broadcast(&self, event: ControlEvent<P>) -> Result<(), Error> {
+        self.req_tx
+            .send(event)
+            .map(drop)
+            .map_err(|_| Error::msg("Can't send a direct message"))
+    }
+}
+
 #[derive(Deref, DerefMut)]
 pub struct TaskContext<T: RunnableTask> {
     /// Filled by a dependencies controller
