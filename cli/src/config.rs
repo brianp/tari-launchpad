@@ -23,10 +23,14 @@
 
 use std::{path::PathBuf, time::Duration};
 
+use anyhow::Error;
+// TODO: Remove this crate
 use derivative::Derivative;
 use serde::{Deserialize, Serialize};
+use tari_base_node_grpc_client::grpc::NodeIdentity;
+use tari_common_types::{emoji::EmojiId, types::PublicKey};
 use tari_sdm::{config::ManagedProtocol, image::Envs};
-use tari_utilities::Hidden;
+use tari_utilities::{ByteArray, Hidden};
 use thiserror::Error;
 
 pub const DEFAULT_MONEROD_URL: &str = "http://stagenet.xmr-tw.org:38081,\
@@ -156,7 +160,37 @@ pub struct LaunchpadProtocol;
 
 impl ManagedProtocol for LaunchpadProtocol {
     type Config = LaunchpadConfig;
-    type Inner = ();
+    type Inner = LaunchpadInnerEvent;
+}
+
+#[derive(Debug, Clone)]
+pub enum LaunchpadInnerEvent {
+    IdentityReady(BaseNodeIdentity),
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BaseNodeIdentity {
+    pub public_key: Vec<u8>,
+    pub public_address: String,
+    node_id: Vec<u8>,
+    emoji_id: String,
+}
+
+impl TryFrom<NodeIdentity> for BaseNodeIdentity {
+    type Error = Error;
+
+    fn try_from(value: NodeIdentity) -> Result<Self, Self::Error> {
+        let public_key = PublicKey::from_bytes(&value.public_key)?;
+        // TODO: Implement `Serialize` for `EmojiId`
+        let emoji_id = EmojiId::from_public_key(&public_key).to_string();
+        Ok(BaseNodeIdentity {
+            public_key: value.public_key,
+            public_address: value.public_address,
+            node_id: value.node_id,
+            emoji_id,
+        })
+    }
 }
 
 #[derive(Debug)]

@@ -21,6 +21,8 @@ pub trait ManagedContainer: fmt::Debug + Send + 'static {
         config.is_some()
     }
 
+    fn on_event(&mut self, _event: <Self::Protocol as ManagedProtocol>::Inner) {}
+
     fn registry(&self) -> &str;
 
     fn image_name(&self) -> &str;

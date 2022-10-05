@@ -25,7 +25,7 @@ use super::{
     VAR_TARI_PATH,
 };
 use crate::{
-    config::{ConnectionSettings, LaunchpadConfig, LaunchpadProtocol},
+    config::{ConnectionSettings, LaunchpadConfig, LaunchpadInnerEvent, LaunchpadProtocol},
     networks::LocalNet,
     volumes::SharedVolume,
 };
@@ -109,12 +109,16 @@ impl ManagedContainer for TariBaseNode {
 
 pub struct Checker {
     progress: SyncProgress,
+    identity_sent: bool,
 }
 
 impl Checker {
     fn new() -> Self {
         let progress = SyncProgress::new(0, 100);
-        Self { progress }
+        Self {
+            progress,
+            identity_sent: false,
+        }
     }
 }
 
@@ -123,6 +127,14 @@ impl ContainerChecker<LaunchpadProtocol> for Checker {
     async fn on_interval(&mut self, ctx: &mut CheckerContext<LaunchpadProtocol>) -> Result<(), Error> {
         // TODO: Keep the client
         let mut client = BaseNodeGrpcClient::connect("http://127.0.0.1:18142").await?;
+
+        if !self.identity_sent {
+            let identity = client.identify(grpc::Empty {}).await?.into_inner().try_into()?;
+            let event = LaunchpadInnerEvent::IdentityReady(identity);
+            ctx.notify(event)?;
+            self.identity_sent = true;
+        }
+
         let response = client.get_sync_progress(grpc::Empty {}).await?.into_inner();
         log::trace!("Sync progress: {:?}", response);
         let done = matches!(response.state(), tari_app_grpc::tari_rpc::SyncState::Done);
@@ -134,6 +146,7 @@ impl ContainerChecker<LaunchpadProtocol> for Checker {
         if done {
             ctx.report(CheckerEvent::Ready).ok();
         }
+
         // let current = progress.local_height;
         // let total = progress.tip_height;
         // let pct = current as f32 / total as f32 * 100.0;
