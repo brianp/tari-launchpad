@@ -11,7 +11,7 @@ use crate::{config::ManagedProtocol, ids::TaskId};
 pub trait ManagedContainer: fmt::Debug + Send + 'static {
     type Protocol: ManagedProtocol;
 
-    fn checker(&mut self) -> Box<dyn ContainerChecker> {
+    fn checker(&mut self) -> Box<dyn ContainerChecker<Self::Protocol>> {
         Box::new(ReadyIfStarted)
     }
 

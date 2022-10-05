@@ -61,7 +61,7 @@ impl ManagedContainer for TariBaseNode {
         self.settings.is_some()
     }
 
-    fn checker(&mut self) -> Box<dyn ContainerChecker> {
+    fn checker(&mut self) -> Box<dyn ContainerChecker<LaunchpadProtocol>> {
         Box::new(Checker::new())
     }
 
@@ -119,7 +119,7 @@ impl Checker {
 }
 
 #[async_trait]
-impl ContainerChecker for Checker {
+impl ContainerChecker<LaunchpadProtocol> for Checker {
     async fn on_interval(&mut self, ctx: &mut CheckerContext) -> Result<(), Error> {
         // TODO: Keep the client
         let mut client = BaseNodeGrpcClient::connect("http://127.0.0.1:18142").await?;

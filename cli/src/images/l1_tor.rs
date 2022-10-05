@@ -50,7 +50,7 @@ impl ManagedContainer for Tor {
         self.settings.is_some()
     }
 
-    fn checker(&mut self) -> Box<dyn ContainerChecker> {
+    fn checker(&mut self) -> Box<dyn ContainerChecker<LaunchpadProtocol>> {
         Box::new(Checker::new())
     }
 
@@ -90,7 +90,7 @@ impl Checker {
 }
 
 #[async_trait]
-impl ContainerChecker for Checker {
+impl ContainerChecker<LaunchpadProtocol> for Checker {
     // TODO: Add result here?
     async fn on_log_event(&mut self, record: String, ctx: &mut CheckerContext) {
         if let Some(caps) = self.re.captures(&record) {

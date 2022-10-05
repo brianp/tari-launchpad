@@ -1,4 +1,4 @@
-use std::pin::Pin;
+use std::{marker::PhantomData, pin::Pin};
 
 use anyhow::Error;
 use async_trait::async_trait;
@@ -11,6 +11,7 @@ use tokio::{
 };
 
 use super::task::Event;
+use crate::image::ManagedProtocol;
 
 #[derive(Debug)]
 pub enum CheckerEvent {
@@ -41,7 +42,7 @@ impl CheckerContext {
 }
 
 #[async_trait]
-pub trait ContainerChecker: Send {
+pub trait ContainerChecker<P: ManagedProtocol>: Send {
     async fn entrypoint(mut self: Box<Self>, mut ctx: CheckerContext) {
         ctx.send(CheckerEvent::Progress(0)).ok();
         loop {
@@ -69,7 +70,7 @@ pub trait ContainerChecker: Send {
 
 pub struct ReadyIfStarted;
 
-impl ContainerChecker for ReadyIfStarted {}
+impl<P: ManagedProtocol> ContainerChecker<P> for ReadyIfStarted {}
 
 #[derive(Deref, DerefMut)]
 pub struct Logs {
