@@ -120,7 +120,7 @@ impl Checker {
 
 #[async_trait]
 impl ContainerChecker<LaunchpadProtocol> for Checker {
-    async fn on_interval(&mut self, ctx: &mut CheckerContext) -> Result<(), Error> {
+    async fn on_interval(&mut self, ctx: &mut CheckerContext<LaunchpadProtocol>) -> Result<(), Error> {
         // TODO: Keep the client
         let mut client = BaseNodeGrpcClient::connect("http://127.0.0.1:18142").await?;
         let response = client.get_sync_progress(grpc::Empty {}).await?.into_inner();
@@ -130,16 +130,16 @@ impl ContainerChecker<LaunchpadProtocol> for Checker {
         let info = self.progress.progress_info();
         log::warn!("PROGRESS: {:?}", info);
         println!("!PROGRESS={}", info.block_progress);
-        ctx.send(CheckerEvent::Progress(info.block_progress as u8)).ok();
+        ctx.report(CheckerEvent::Progress(info.block_progress as u8)).ok();
         if done {
-            ctx.send(CheckerEvent::Ready).ok();
+            ctx.report(CheckerEvent::Ready).ok();
         }
         // let current = progress.local_height;
         // let total = progress.tip_height;
         // let pct = current as f32 / total as f32 * 100.0;
-        // ctx.send(CheckerEvent::Progress(pct as u8)).ok();
+        // ctx.report_progress(CheckerEvent::Progress(pct as u8)).ok();
         // if current == total && total != 0 {
-        // ctx.send(CheckerEvent::Ready).ok();
+        // ctx.report_progress(CheckerEvent::Ready).ok();
         // }
         Ok(())
     }

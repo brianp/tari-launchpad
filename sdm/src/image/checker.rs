@@ -11,7 +11,7 @@ use tokio::{
 };
 
 use super::task::Event;
-use crate::image::ManagedProtocol;
+use crate::{image::ManagedProtocol, scope::ControlEvent, task::TaskSender};
 
 #[derive(Debug)]
 pub enum CheckerEvent {
@@ -22,30 +22,35 @@ pub enum CheckerEvent {
     Ready,
 }
 
-pub struct CheckerContext {
+pub struct CheckerContext<P: ManagedProtocol> {
     logs: Logs,
-    sender: mpsc::UnboundedSender<Event>,
+    sender: TaskSender<Event, P>,
 }
 
-impl CheckerContext {
-    pub(crate) fn new(logs: Logs, sender: mpsc::UnboundedSender<Event>) -> Self {
+impl<P: ManagedProtocol> CheckerContext<P> {
+    pub(crate) fn new(logs: Logs, sender: TaskSender<Event, P>) -> Self {
         Self { logs, sender }
     }
 
-    // TODO: Remove it
-    pub fn send(&self, event: CheckerEvent) -> Result<(), Error> {
+    /// Reports the task about the progress.
+    pub fn report(&self, event: CheckerEvent) -> Result<(), Error> {
         let event = Event::CheckerEvent(event);
-        self.sender
-            .send(event)
-            .map_err(|_| Error::msg("Can't send message from the checker's context"))?;
-        Ok(())
+
+        self.sender.send_direct(event)
+    }
+
+    /// Notifies all tasks with the inner event.
+    pub fn notify(&self, event: P::Inner) -> Result<(), Error> {
+        let event = ControlEvent::InnerEvent(event);
+
+        self.sender.send_broadcast(event)
     }
 }
 
 #[async_trait]
 pub trait ContainerChecker<P: ManagedProtocol>: Send {
-    async fn entrypoint(mut self: Box<Self>, mut ctx: CheckerContext) {
-        ctx.send(CheckerEvent::Progress(0)).ok();
+    async fn entrypoint(mut self: Box<Self>, mut ctx: CheckerContext<P>) {
+        ctx.report(CheckerEvent::Progress(0)).ok();
         loop {
             select! {
                 log_event = ctx.logs.next() => {
@@ -62,9 +67,9 @@ pub trait ContainerChecker<P: ManagedProtocol>: Send {
         }
     }
 
-    async fn on_log_event(&mut self, record: String, ctx: &mut CheckerContext) {}
+    async fn on_log_event(&mut self, record: String, ctx: &mut CheckerContext<P>) {}
 
-    async fn on_interval(&mut self, _ctx: &mut CheckerContext) -> Result<(), Error> {
+    async fn on_interval(&mut self, _ctx: &mut CheckerContext<P>) -> Result<(), Error> {
         Ok(())
     }
 }

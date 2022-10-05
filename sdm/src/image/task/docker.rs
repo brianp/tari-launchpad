@@ -61,7 +61,7 @@ impl<C: ManagedProtocol> TaskContext<ImageTask<C>> {
             filters: type_filter,
         };
         let stream = self.driver.events(Some(opts)).map_err(Error::from);
-        let sender = self.sender.clone();
+        let sender = self.sender().get_direct().clone();
         let conv = EventConv {
             // TODO: Name is not necessary here
             name: self.inner.container_name.clone(),
@@ -96,7 +96,7 @@ impl<C: ManagedProtocol> TaskContext<ImageTask<C>> {
             ..Default::default()
         });
         let stream = self.driver.create_image(opts, None, None).map_err(Error::from);
-        let sender = self.sender.clone();
+        let sender = self.sender().get_direct().clone();
         Forwarder::start(stream, ProgressConv, sender)
     }
 

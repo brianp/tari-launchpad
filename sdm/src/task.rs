@@ -48,11 +48,28 @@ pub struct TaskSender<E, P: ManagedProtocol> {
     req_tx: broadcast::Sender<ControlEvent<P>>,
 }
 
+impl<E, P: ManagedProtocol> Clone for TaskSender<E, P> {
+    fn clone(&self) -> Self {
+        Self {
+            event_tx: self.event_tx.clone(),
+            req_tx: self.req_tx.clone(),
+        }
+    }
+}
+
 impl<E, P: ManagedProtocol> TaskSender<E, P> {
+    pub fn get_direct(&self) -> &mpsc::UnboundedSender<E> {
+        &self.event_tx
+    }
+
     pub fn send_direct(&self, event: E) -> Result<(), Error> {
         self.event_tx
             .send(event)
             .map_err(|_| Error::msg("Can't send a direct message"))
+    }
+
+    pub fn get_broadcast(&self) -> &broadcast::Sender<ControlEvent<P>> {
+        &self.req_tx
     }
 
     pub fn send_broadcast(&self, event: ControlEvent<P>) -> Result<(), Error> {
@@ -72,11 +89,12 @@ pub struct TaskContext<T: RunnableTask> {
     should_start: bool,
     pub status: SdmStatus<T::Status>,
 
+    sender: TaskSender<T::Event, T::Protocol>,
+
     // TODO: Join both into the single struct
     // TODO: Hide with `send` method
-    pub sender: mpsc::UnboundedSender<T::Event>,
-    pub requests_sender: broadcast::Sender<ControlEvent<T::Protocol>>,
-
+    // pub sender: mpsc::UnboundedSender<T::Event>,
+    // pub requests_sender: broadcast::Sender<ControlEvent<T::Protocol>>,
     pub driver: Docker,
 
     #[deref]
@@ -91,6 +109,10 @@ impl<T: RunnableTask> TaskContext<T> {
 
     pub fn resource(&self, id: &TaskId) -> Option<&str> {
         self.resources_map.get(id).map(String::as_ref)
+    }
+
+    pub fn sender(&self) -> &TaskSender<T::Event, T::Protocol> {
+        &self.sender
     }
 }
 
@@ -112,13 +134,16 @@ where TaskContext<R>: RunnableContext<R>
 {
     pub fn new<M: ManagedTask>(req_tx: broadcast::Sender<ControlEvent<R::Protocol>>, inner: R, docker: Docker) -> Self {
         let (event_tx, event_rx) = mpsc::unbounded_channel();
+        let sender = TaskSender {
+            event_tx,
+            req_tx: req_tx.clone(),
+        };
         let context = TaskContext {
             dependencies_ready: false,
             resources_map: HashMap::new(),
             should_start: false,
             status: SdmStatus::new(inner.name().to_string()),
-            sender: event_tx,
-            requests_sender: req_tx.clone(),
+            sender,
             driver: docker,
             inner,
         };

@@ -92,13 +92,13 @@ impl Checker {
 #[async_trait]
 impl ContainerChecker<LaunchpadProtocol> for Checker {
     // TODO: Add result here?
-    async fn on_log_event(&mut self, record: String, ctx: &mut CheckerContext) {
+    async fn on_log_event(&mut self, record: String, ctx: &mut CheckerContext<LaunchpadProtocol>) {
         if let Some(caps) = self.re.captures(&record) {
             if let Some(value) = caps.name("pct") {
                 if let Ok(value) = value.as_str().parse() as Result<i32, _> {
-                    ctx.send(CheckerEvent::Progress(value as u8)).ok();
+                    ctx.report(CheckerEvent::Progress(value as u8)).ok();
                     if value == 100 {
-                        ctx.send(CheckerEvent::Ready).ok();
+                        ctx.report(CheckerEvent::Ready).ok();
                     }
                 }
             }

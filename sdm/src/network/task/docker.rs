@@ -26,7 +26,7 @@ impl<C: ManagedProtocol> TaskContext<NetworkTask<C>> {
             filters: type_filter,
         };
         let stream = self.driver.events(Some(opts)).map_err(Error::from);
-        let sender = self.sender.clone();
+        let sender = self.sender().get_direct().clone();
         let conv = EventConv {
             // TODO: Name is not necessary here
             name: self.inner.network_name.clone(),
