@@ -56,6 +56,10 @@ impl<C: ManagedProtocol> RunnableContext<ImageTask<C>> for TaskContext<ImageTask
         self.inner.image.reconfigure(config)
     }
 
+    fn process_inner_event(&mut self, event: C::Inner) {
+        self.inner.image.on_event(event)
+    }
+
     fn process_event(&mut self, event: Event) -> Result<(), Error> {
         self.process_event_impl(event)
     }

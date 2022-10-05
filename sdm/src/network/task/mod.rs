@@ -51,6 +51,10 @@ impl<C: ManagedProtocol> RunnableContext<NetworkTask<C>> for TaskContext<Network
         self.inner.network.reconfigure(config)
     }
 
+    fn process_inner_event(&mut self, event: C::Inner) {
+        log::warn!("Inner event is ignored by a network task");
+    }
+
     fn process_event(&mut self, event: Event) -> Result<(), Error> {
         self.process_event_impl(event)
     }

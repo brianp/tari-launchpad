@@ -52,6 +52,10 @@ impl<C: ManagedProtocol> RunnableContext<VolumeTask<C>> for TaskContext<VolumeTa
         self.inner.volume.reconfigure(config)
     }
 
+    fn process_inner_event(&mut self, event: C::Inner) {
+        log::warn!("Inner event is ignored by a volume task");
+    }
+
     fn process_event(&mut self, event: Event) -> Result<(), Error> {
         self.process_event_impl(event)
     }

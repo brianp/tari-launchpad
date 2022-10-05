@@ -39,6 +39,7 @@ pub trait RunnableContext<T: RunnableTask> {
     /// Subscribe to events here
     async fn initialize(&mut self);
     fn reconfigure(&mut self, config: Option<&<T::Protocol as ManagedProtocol>::Config>) -> bool;
+    fn process_inner_event(&mut self, event: <T::Protocol as ManagedProtocol>::Inner);
     fn process_event(&mut self, event: T::Event) -> Result<(), Error>;
     async fn update(&mut self) -> Result<(), Error>;
 }
@@ -248,7 +249,7 @@ where TaskContext<R>: RunnableContext<R>
                 }
             },
             ControlEvent::InnerEvent(inner) => {
-                // TODO: Implement it
+                self.process_inner_event(inner);
             },
         }
     }
@@ -265,6 +266,10 @@ where TaskContext<R>: RunnableContext<R>
     pub fn reconfigure(&mut self, config: Option<&<R::Protocol as ManagedProtocol>::Config>) {
         let active = self.context.reconfigure(config);
         self.context.should_start = active;
+    }
+
+    pub fn process_inner_event(&mut self, event: <R::Protocol as ManagedProtocol>::Inner) {
+        self.context.process_inner_event(event);
     }
 
     pub fn process_event(&mut self, event: R::Event) {
