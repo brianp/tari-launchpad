@@ -1,11 +1,13 @@
+use tari_common_types::types::PublicKey;
 use tari_sdm::{
     ids::{ManagedTask, TaskId},
     image::{Args, Envs, ManagedContainer, Mounts, Ports, Volumes},
 };
+use tari_utilities::hex::Hex;
 
 use super::{TariBaseNode, DEFAULT_REGISTRY, GENERAL_VOLUME};
 use crate::{
-    config::{ConnectionSettings, LaunchpadConfig, LaunchpadProtocol},
+    config::{BaseNodeIdentity, ConnectionSettings, LaunchpadConfig, LaunchpadInnerEvent, LaunchpadProtocol},
     images::{BLOCKCHAIN_PATH, VAR_TARI_PATH},
     networks::LocalNet,
     volumes::SharedVolume,
@@ -14,6 +16,7 @@ use crate::{
 #[derive(Debug, Default)]
 pub struct TariWallet {
     settings: Option<ConnectionSettings>,
+    identity: Option<BaseNodeIdentity>,
 }
 
 impl ManagedTask for TariWallet {
@@ -42,6 +45,14 @@ impl ManagedContainer for TariWallet {
         self.settings.is_some()
     }
 
+    fn on_event(&mut self, event: LaunchpadInnerEvent) {
+        match event {
+            LaunchpadInnerEvent::IdentityReady(identity) => {
+                self.identity = Some(identity);
+            },
+        }
+    }
+
     fn ports(&self, ports: &mut Ports) {
         ports.add(18_143);
         ports.add(18_188);
@@ -53,8 +64,13 @@ impl ManagedContainer for TariWallet {
         args.flag("--enable-grpc");
         args.flag("-n");
 
-        if let Some(settings) = self.settings.as_ref() {
-            args.set("-p", format!("wallet.custom_base_node={}::{}", "hi", "hi"));
+        if let Some(identity) = self.identity.as_ref() {
+            let value = format!(
+                "wallet.custom_base_node={}::{}",
+                identity.public_key.to_hex(),
+                identity.public_address
+            );
+            args.set_pair("-p", value);
         }
     }
 
