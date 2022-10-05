@@ -25,6 +25,7 @@ pub enum ControlEvent<C: ManagedProtocol> {
     SetConfig(Option<Arc<C::Config>>),
     ResourceReady { task_id: TaskId, name: String },
     ResourceClosed { task_id: TaskId },
+    InnerEvent(C::Inner),
 }
 
 impl<C: ManagedProtocol> Clone for ControlEvent<C> {
@@ -38,6 +39,7 @@ impl<C: ManagedProtocol> Clone for ControlEvent<C> {
             Self::ResourceClosed { task_id } => Self::ResourceClosed {
                 task_id: task_id.clone(),
             },
+            Self::InnerEvent(inner) => Self::InnerEvent(inner.clone()),
         }
     }
 }

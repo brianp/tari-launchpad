@@ -156,6 +156,7 @@ pub struct LaunchpadProtocol;
 
 impl ManagedProtocol for LaunchpadProtocol {
     type Config = LaunchpadConfig;
+    type Inner = ();
 }
 
 #[derive(Debug)]

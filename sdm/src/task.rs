@@ -196,6 +196,9 @@ where TaskContext<R>: RunnableContext<R>
                     self.check_dependencies();
                 }
             },
+            ControlEvent::InnerEvent(inner) => {
+                // TODO: Implement it
+            },
         }
     }
 
