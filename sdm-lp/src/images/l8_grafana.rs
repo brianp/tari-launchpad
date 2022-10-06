@@ -1,10 +1,13 @@
 use tari_sdm::{
     ids::{ManagedTask, TaskId},
-    image::{Envs, ManagedContainer, Ports},
+    image::{Envs, ManagedContainer, Networks, Ports},
 };
 
 use super::GRAFANA_REGISTRY;
-use crate::config::{ConnectionSettings, LaunchpadConfig, LaunchpadProtocol};
+use crate::{
+    config::{ConnectionSettings, LaunchpadConfig, LaunchpadProtocol},
+    networks::LocalNet,
+};
 
 #[derive(Debug, Default)]
 pub struct Grafana {
@@ -43,6 +46,10 @@ impl ManagedContainer for Grafana {
             // TODO: Check the `display` call is correct here?
             envs.set("DATA_FOLDER", settings.data_directory.display());
         }
+    }
+
+    fn networks(&self, networks: &mut Networks) {
+        networks.add("grafana", LocalNet::id());
     }
 
     fn ports(&self, ports: &mut Ports) {

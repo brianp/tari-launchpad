@@ -19,9 +19,10 @@ async fn main() -> Result<(), Error> {
     scope.add_image(images::Tor::default()).await?;
     scope.add_image(images::TariBaseNode::default()).await?;
     scope.add_image(images::TariWallet::default()).await?;
-    // scope.add_image(images::Loki::default()).await?;
-    // scope.add_image(images::Promtail::default()).await?;
-    // scope.add_image(images::Grafana::default()).await?;
+
+    scope.add_image(images::Loki::default()).await?;
+    scope.add_image(images::Promtail::default()).await?;
+    scope.add_image(images::Grafana::default()).await?;
 
     ctrl_c().await?;
     log::info!("Set config");
@@ -36,7 +37,7 @@ async fn main() -> Result<(), Error> {
     let mut config = LaunchpadConfig {
         data_directory,
         with_monitoring: true,
-        tor_control_password: create_password(16).into(),
+        tor_control_password: "tari".to_string().into(), // create_password(16).into(),
         wallet: Some(wallet_config),
         ..Default::default()
     };

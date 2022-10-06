@@ -82,7 +82,7 @@ impl ManagedContainer for TariWallet {
                 "TARI_BASE_NODE__DATA_DIR",
                 format!("/blockchain/{}", settings.tari_network.lower_case()),
             );
-            envs.set("TARI_WALLET_PASSWORD", &settings.wallet_password); // HERE
+            envs.set("TARI_WALLET_PASSWORD", settings.wallet_password.reveal()); // HERE
         }
         envs.set("SHELL", "/bin/bash");
         envs.set("TERM", "linux");

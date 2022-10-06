@@ -3,8 +3,6 @@ use std::path::PathBuf;
 use anyhow::Error;
 use tokio::fs;
 
-use crate::config::LaunchpadConfig;
-
 macro_rules! embed_file {
     ($f:literal) => {
         ConfigFile::new($f, include_str!(concat!("../../backend/assets/", $f)))

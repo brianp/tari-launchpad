@@ -1,10 +1,13 @@
 use tari_sdm::{
     ids::{ManagedTask, TaskId},
-    image::{Args, ManagedContainer, Ports},
+    image::{Args, ManagedContainer, Networks, Ports},
 };
 
 use super::GRAFANA_REGISTRY;
-use crate::config::{LaunchpadConfig, LaunchpadProtocol};
+use crate::{
+    config::{LaunchpadConfig, LaunchpadProtocol},
+    networks::LocalNet,
+};
 
 #[derive(Debug, Default)]
 pub struct Loki;
@@ -28,6 +31,10 @@ impl ManagedContainer for Loki {
 
     fn args(&self, args: &mut Args) {
         args.set("-config.file", "/etc/loki/local-config.yaml");
+    }
+
+    fn networks(&self, networks: &mut Networks) {
+        networks.add("loki", LocalNet::id());
     }
 
     fn ports(&self, ports: &mut Ports) {

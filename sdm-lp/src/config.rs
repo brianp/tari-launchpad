@@ -21,7 +21,7 @@
 // USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-use std::{path::PathBuf, time::Duration};
+use std::path::PathBuf;
 
 use anyhow::Error;
 use serde::{Deserialize, Serialize};
