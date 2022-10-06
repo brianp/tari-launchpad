@@ -15,7 +15,7 @@ use tokio_stream::wrappers::{BroadcastStream, UnboundedReceiverStream};
 use crate::{
     config::ManagedProtocol,
     ids::{ManagedTask, TaskId},
-    scope::ControlEvent,
+    scope::{ControlEvent, Report},
     status::SdmStatus,
 };
 
@@ -46,6 +46,7 @@ pub trait RunnableContext<T: RunnableTask> {
 
 pub struct TaskSender<E, P: ManagedProtocol> {
     event_tx: mpsc::UnboundedSender<E>,
+    rep_tx: mpsc::UnboundedSender<Report<P>>,
     req_tx: broadcast::Sender<ControlEvent<P>>,
 }
 
@@ -53,6 +54,7 @@ impl<E, P: ManagedProtocol> Clone for TaskSender<E, P> {
     fn clone(&self) -> Self {
         Self {
             event_tx: self.event_tx.clone(),
+            rep_tx: self.rep_tx.clone(),
             req_tx: self.req_tx.clone(),
         }
     }
@@ -78,6 +80,14 @@ impl<E, P: ManagedProtocol> TaskSender<E, P> {
             .send(event)
             .map(drop)
             .map_err(|_| Error::msg("Can't send a direct message"))
+    }
+
+    pub fn get_reporter(&self) -> &mpsc::UnboundedSender<Report<P>> {
+        &self.rep_tx
+    }
+
+    pub fn send_report(&self, event: Report<P>) -> Result<(), Error> {
+        self.rep_tx.send(event).map_err(|_| Error::msg("Can't send a report"))
     }
 }
 
@@ -133,10 +143,16 @@ pub struct SdmTaskRunner<R: RunnableTask> {
 impl<R: RunnableTask> SdmTaskRunner<R>
 where TaskContext<R>: RunnableContext<R>
 {
-    pub fn new<M: ManagedTask>(req_tx: broadcast::Sender<ControlEvent<R::Protocol>>, inner: R, docker: Docker) -> Self {
+    pub fn new<M: ManagedTask>(
+        req_tx: broadcast::Sender<ControlEvent<R::Protocol>>,
+        rep_tx: mpsc::UnboundedSender<Report<R::Protocol>>,
+        inner: R,
+        docker: Docker,
+    ) -> Self {
         let (event_tx, event_rx) = mpsc::unbounded_channel();
         let sender = TaskSender {
             event_tx,
+            rep_tx,
             req_tx: req_tx.clone(),
         };
         let context = TaskContext {
