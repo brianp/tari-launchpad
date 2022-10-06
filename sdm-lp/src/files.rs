@@ -3,6 +3,8 @@ use std::path::PathBuf;
 use anyhow::Error;
 use tokio::fs;
 
+use crate::config::LaunchpadConfig;
+
 macro_rules! embed_file {
     ($f:literal) => {
         ConfigFile::new($f, include_str!(concat!("../../backend/assets/", $f)))
@@ -44,6 +46,15 @@ impl Configurator {
     pub fn base_path(&self) -> &PathBuf {
         &self.base_dir
     }
+
+    // pub async fn read_config(&self) -> Result<LaunchpadConfig, Error> {
+    // let mut path = self.base_dir.clone();
+    // path.push("config");
+    // path.push("config.toml");
+    // let data = fs::read_to_string(&path).await?;
+    // let config = toml::from_str(&data)?;
+    // Ok(config)
+    // }
 
     async fn create_dir(&mut self, folder: &PathBuf) -> Result<(), Error> {
         if !folder.exists() {

@@ -38,18 +38,10 @@ http://xmr-lux.boldsuck.org:38081,\
 http://singapore.node.xmr.pm:38081";
 
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
-pub struct BaseNodeConfig {
-    // TODO: Remove (not needed)
-    /// The time delay before starting the container and running the base node executable
-    pub delay: Duration,
-}
+pub struct BaseNodeConfig {}
 
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
 pub struct WalletConfig {
-    // TODO: Remove (not needed)
-    /// The time delay before starting the container and running the wallet executable
-    pub delay: Duration,
-
     /// The password to de/en-crypt the wallet database
     #[serde(skip_serializing)]
     pub password: Hidden<String>,
@@ -57,24 +49,18 @@ pub struct WalletConfig {
 
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
 pub struct XmRigConfig {
-    /// The time delay before starting the container and running the monero miner executable
-    pub delay: Duration,
     /// The address that will accept Monero mining rewards
     pub monero_mining_address: String,
 }
 
 #[derive(Default, Debug, Serialize, Deserialize, Clone)]
 pub struct Sha3MinerConfig {
-    /// The time delay before starting the container and running the SHA3 CPU miner executable
-    pub delay: Duration,
     /// The number of threads to employ for SHA3 mining
     pub num_mining_threads: usize,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct MmProxyConfig {
-    /// The time delay before starting the container and running the proxy executable
-    pub delay: Duration,
     /// A URL specifying the Monero daemon to connect to
     pub monerod_url: String,
     /// If required, the monero username for the monero daemon
@@ -89,7 +75,6 @@ pub struct MmProxyConfig {
 impl Default for MmProxyConfig {
     fn default() -> Self {
         MmProxyConfig {
-            delay: Duration::from_secs(5),
             monerod_url: DEFAULT_MONEROD_URL.to_string(),
             monero_username: "".to_string(),
             monero_password: Hidden::default(),

@@ -1,6 +1,12 @@
 use anyhow::Error;
 use tari_sdm::SdmScope;
-use tari_sdm_launchpad::{config::LaunchpadConfig, files::Configurator, images, networks, volumes};
+use tari_sdm_launchpad::{
+    config::{LaunchpadConfig, WalletConfig},
+    files::Configurator,
+    images,
+    networks,
+    volumes,
+};
 use tokio::signal::ctrl_c;
 
 #[tokio::main]
@@ -23,10 +29,15 @@ async fn main() -> Result<(), Error> {
     let mut configurator = Configurator::init()?;
     let data_directory = configurator.base_path().clone();
     configurator.repair_configuration().await?;
+    // let mut config = configurator.read_config().await?;
+    let wallet_config = WalletConfig {
+        password: "123".to_string().into(),
+    };
     let mut config = LaunchpadConfig {
         data_directory,
         with_monitoring: true,
         tor_control_password: create_password(16).into(),
+        wallet: Some(wallet_config),
         ..Default::default()
     };
     scope.set_config(Some(config.clone())).await?;
