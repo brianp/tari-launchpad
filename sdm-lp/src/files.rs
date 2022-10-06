@@ -5,7 +5,7 @@ use tokio::fs;
 
 macro_rules! embed_file {
     ($f:literal) => {
-        ConfigFile::new($f, concat!("../../backend/assets/", $f))
+        ConfigFile::new($f, include_str!(concat!("../../backend/assets/", $f)))
     };
 }
 
@@ -47,9 +47,18 @@ impl Configurator {
 
     async fn create_dir(&mut self, folder: &PathBuf) -> Result<(), Error> {
         if !folder.exists() {
-            fs::create_dir_all(folder).await?;
+            fs::create_dir_all(&folder).await?;
         }
         Ok(())
+    }
+
+    async fn create_sub_dir(&mut self, folder: &PathBuf, sub_path: &str) -> Result<PathBuf, Error> {
+        let mut path = folder.clone();
+        path.push(sub_path);
+        if !path.exists() {
+            fs::create_dir_all(&path).await?;
+        }
+        Ok(path)
     }
 
     async fn store_file(&mut self, folder: &PathBuf, file: &ConfigFile) -> Result<(), Error> {
@@ -63,18 +72,27 @@ impl Configurator {
 
     pub async fn repair_configuration(&mut self) -> Result<(), Error> {
         // base path
-        let mut path = self.base_dir.clone();
-        self.create_dir(&path).await?;
-        // config folder
-        path.push("config");
-        self.create_dir(&path).await?;
+        let base_dir = self.base_dir.clone();
+        self.create_dir(&base_dir).await?;
+        let config_dir = self.create_sub_dir(&base_dir, "config").await?;
         // config files
-        self.store_file(&path, &CONFIG_TOML).await?;
-        self.store_file(&path, &DEFAULTS_INI).await?;
-        self.store_file(&path, &LOGS4RS_YML).await?;
-        self.store_file(&path, &LOKI_YML).await?;
-        self.store_file(&path, &PROMTAIL_YML).await?;
-        self.store_file(&path, &PROVISION_YML).await?;
+        self.store_file(&config_dir, &CONFIG_TOML).await?;
+        self.store_file(&config_dir, &DEFAULTS_INI).await?;
+        self.store_file(&config_dir, &LOGS4RS_YML).await?;
+        self.store_file(&config_dir, &LOKI_YML).await?;
+        self.store_file(&config_dir, &PROMTAIL_YML).await?;
+        self.store_file(&config_dir, &PROVISION_YML).await?;
+
+        // TODO: Use `enum` here...
+        // images
+        self.create_sub_dir(&base_dir, "tor").await?;
+        self.create_sub_dir(&base_dir, "base_node").await?;
+        self.create_sub_dir(&base_dir, "wallet").await?;
+        self.create_sub_dir(&base_dir, "xmrig").await?;
+        self.create_sub_dir(&base_dir, "sha3_miner").await?;
+        self.create_sub_dir(&base_dir, "mm_proxy").await?;
+        self.create_sub_dir(&base_dir, "monerod").await?;
+        self.create_sub_dir(&base_dir, "grafana").await?;
         Ok(())
     }
 
