@@ -1,4 +1,7 @@
 use async_trait::async_trait;
+use tari_base_node_grpc_client::{BaseNodeGrpcClient, grpc};
+use tari_common_types::types::PublicKey;
+use tari_utilities::{byte_array::ByteArray, hex::Hex};
 use tari_sdm::{
     ids::{ManagedTask, TaskId},
     image::{ManagedContainer, Ports, Volumes},
@@ -55,9 +58,15 @@ impl ManagedContainer for TariWallet {
         args.flag("--enable-grpc");
         args.flag("-n");
 
-        if let Some(settings) = self.settings.as_ref() {
-            args.set("-p", format!("wallet.custom_base_node={}::{}", "hi","hi"));
+        if let Ok(mut client) = BaseNodeGrpcClient::connect("http://127.0.0.1:18142").await {
+            if let Ok(rep) = client.identify(grpc::Empty {}).await.map_err(|e| e.to_string()) {
+                let identity = rep.into_inner();
+                let pub_key = PublicKey::from_bytes(&identity.public_key).expect("Couldn't convert the pubkey");
+
+                args.set("-p", format!("wallet.custom_base_node={}::{}", pub_key.to_hex(), identity.public_address));
+            }
         }
+
     }
 
     fn envs(&self, envs: &mut Envs) {
