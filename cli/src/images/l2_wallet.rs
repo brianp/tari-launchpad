@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use tari_sdm::{
     ids::{ManagedTask, TaskId},
     image::{ManagedContainer, Ports, Volumes},
@@ -26,6 +27,7 @@ impl ManagedTask for TariWallet {
     }
 }
 
+#[async_trait]
 impl ManagedContainer for TariWallet {
     type Config = LaunchpadConfig;
 
@@ -47,8 +49,7 @@ impl ManagedContainer for TariWallet {
         ports.add(18_188);
     }
 
-    fn args(&self, args: &mut Args) {
-        self.
+    async fn args(&self, args: &mut Args) {
         args.set("--log-config", "/var/tari/config/log4rs.yml");
         args.set("--seed-words-file", "/var/tari/config/seed_words.txt");
         args.flag("--enable-grpc");

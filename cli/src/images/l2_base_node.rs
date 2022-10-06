@@ -37,6 +37,7 @@ impl ManagedTask for TariBaseNode {
     }
 }
 
+#[async_trait]
 impl ManagedContainer for TariBaseNode {
     type Config = LaunchpadConfig;
 
@@ -57,7 +58,7 @@ impl ManagedContainer for TariBaseNode {
         Box::new(Checker::new())
     }
 
-    fn args(&self, args: &mut Args) {
+    async fn args(&self, args: &mut Args) {
         args.set("--log-config", "/var/tari/config/log4rs.yml");
         args.flag("-n");
         args.set("--watch", "status");

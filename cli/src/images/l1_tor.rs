@@ -34,6 +34,7 @@ impl ManagedTask for Tor {
     }
 }
 
+#[async_trait]
 impl ManagedContainer for Tor {
     type Config = LaunchpadConfig;
 
@@ -54,7 +55,7 @@ impl ManagedContainer for Tor {
         Box::new(Checker::new())
     }
 
-    fn args(&self, args: &mut Args) {
+    async fn args(&self, args: &mut Args) {
         args.set_pair("--SocksPort", "0.0.0.0:9050");
         args.set_pair("--ControlPort", "0.0.0.0:9051");
         args.set_pair("--CookieAuthentication", 0);

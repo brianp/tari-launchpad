@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use tari_sdm::{
     ids::{ManagedTask, TaskId},
     image::{Args, ManagedContainer, Ports},
@@ -15,6 +16,7 @@ impl ManagedTask for Promtail {
     }
 }
 
+#[async_trait]
 impl ManagedContainer for Promtail {
     type Config = LaunchpadConfig;
 
@@ -26,7 +28,7 @@ impl ManagedContainer for Promtail {
         "promtail"
     }
 
-    fn args(&self, args: &mut Args) {
+    async fn args(&self, args: &mut Args) {
         args.set("-config.file", "/etc/promtail/config.yml");
     }
 

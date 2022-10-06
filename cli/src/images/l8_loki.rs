@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use tari_sdm::{
     ids::{ManagedTask, TaskId},
     image::{Args, ManagedContainer, Ports},
@@ -15,6 +16,7 @@ impl ManagedTask for Loki {
     }
 }
 
+#[async_trait]
 impl ManagedContainer for Loki {
     type Config = LaunchpadConfig;
 
@@ -26,7 +28,7 @@ impl ManagedContainer for Loki {
         "loki"
     }
 
-    fn args(&self, args: &mut Args) {
+    async fn args(&self, args: &mut Args) {
         args.set("-config.file", "/etc/loki/local-config.yaml");
     }
 

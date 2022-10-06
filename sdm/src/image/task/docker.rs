@@ -131,7 +131,7 @@ impl<C: ManagedConfig> TaskContext<ImageTask<C>> {
 
     pub async fn try_create_container(&mut self) -> Result<(), Error> {
         let mut args = Args::default();
-        self.inner.image.args(&mut args);
+        self.inner.image.args(&mut args).await;
         let mut ports = Ports::default();
         self.inner.image.ports(&mut ports);
         let mut envs = Envs::default();

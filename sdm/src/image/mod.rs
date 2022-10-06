@@ -2,13 +2,15 @@ pub mod checker;
 mod task;
 
 use std::fmt;
+use async_trait::async_trait;
 
 use checker::{ContainerChecker, ReadyIfStarted};
 pub(crate) use task::ImageTask;
 
 use crate::{config::ManagedConfig, ids::TaskId};
 
-pub trait ManagedContainer: fmt::Debug + Send + 'static {
+#[async_trait]
+pub trait ManagedContainer: fmt::Debug + Send + Sync + 'static {
     type Config: ManagedConfig;
 
     fn checker(&mut self) -> Box<dyn ContainerChecker> {
@@ -29,7 +31,7 @@ pub trait ManagedContainer: fmt::Debug + Send + 'static {
         "latest"
     }
 
-    fn args(&self, _args: &mut Args) {}
+    async fn args(&self, _args: &mut Args) {}
 
     fn envs(&self, _envs: &mut Envs) {}
 
