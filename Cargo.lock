@@ -5030,7 +5030,6 @@ name = "tari_cli_launchpad"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "dirs-next 2.0.0",
  "env_logger",
  "log",
  "rand 0.8.5",
@@ -5689,6 +5688,7 @@ dependencies = [
  "anyhow",
  "async-trait",
  "derivative",
+ "dirs-next 2.0.0",
  "log",
  "regex",
  "serde",

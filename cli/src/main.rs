@@ -1,8 +1,6 @@
-use std::path::PathBuf;
-
 use anyhow::Error;
 use tari_sdm::SdmScope;
-use tari_sdm_launchpad::{config::LaunchpadConfig, images, networks, volumes};
+use tari_sdm_launchpad::{config::LaunchpadConfig, files::Configurator, images, networks, volumes};
 use tokio::signal::ctrl_c;
 
 #[tokio::main]
@@ -21,11 +19,10 @@ async fn main() -> Result<(), Error> {
 
     ctrl_c().await?;
     log::info!("Set config");
-    let cache_dir = dirs_next::cache_dir().ok_or_else(|| Error::msg("No cache dir"))?;
-    let mut data_directory = PathBuf::from(cache_dir);
-    data_directory.push("tari");
-    data_directory.push("tmp");
-    data_directory.push("esmeralda");
+
+    let mut configurator = Configurator::init()?;
+    let data_directory = configurator.base_path().clone();
+    configurator.repair_configuration().await?;
     let mut config = LaunchpadConfig {
         data_directory,
         with_monitoring: true,

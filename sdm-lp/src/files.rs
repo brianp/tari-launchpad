@@ -1,13 +1,20 @@
-use anyhow::Error;
-use tokio::fs::create_dir_all;
+use std::path::PathBuf;
 
-const CONFIG_TOML: ConfigFile = ConfigFile::new("config.toml", "../../backend/assets/config.toml");
-const DEFAULTS_INI: ConfigFile = ConfigFile::new("defaults.ini", "../../backend/assets/defaults.ini");
-const LOGS4RS_YML: ConfigFile = ConfigFile::new("log4rs.yml", "../../backend/assets/log4rs.yml");
-const LOKI_YML: ConfigFile = ConfigFile::new("loki_config.yml", "../../backend/assets/loki_config.yml");
-const PROMTAIL_YML: ConfigFile = ConfigFile::new("promtail.config.yml", "../backend/assets/promtail.config.yml");
-const PROVISION_YML: ConfigFile =
-    ConfigFile::new("sources_provision.yml", "../../backend/assets/sources_provision.yml");
+use anyhow::Error;
+use tokio::fs;
+
+macro_rules! embed_file {
+    ($f:literal) => {
+        ConfigFile::new($f, concat!("../../backend/assets/", $f))
+    };
+}
+
+const CONFIG_TOML: ConfigFile = embed_file!("config.toml");
+const DEFAULTS_INI: ConfigFile = embed_file!("defaults.ini");
+const LOGS4RS_YML: ConfigFile = embed_file!("log4rs.yml");
+const LOKI_YML: ConfigFile = embed_file!("loki_config.yml");
+const PROMTAIL_YML: ConfigFile = embed_file!("promtail.config.yml");
+const PROVISION_YML: ConfigFile = embed_file!("sources_provision.yml");
 
 struct ConfigFile {
     filename: &'static str,
@@ -21,12 +28,57 @@ impl ConfigFile {
 }
 
 pub struct Configurator {
-    working_dir: String,
+    base_dir: PathBuf,
 }
 
 impl Configurator {
-    async fn create_folders(&mut self) -> Result<(), Error> {
-        create_dir_all(&self.working_dir).await?;
+    pub fn init() -> Result<Self, Error> {
+        let cache_dir = dirs_next::cache_dir().ok_or_else(|| Error::msg("No cache dir"))?;
+        let mut data_directory = PathBuf::from(cache_dir);
+        data_directory.push("tari-launchpad");
+        Ok(Self {
+            base_dir: data_directory,
+        })
+    }
+
+    pub fn base_path(&self) -> &PathBuf {
+        &self.base_dir
+    }
+
+    async fn create_dir(&mut self, folder: &PathBuf) -> Result<(), Error> {
+        if !folder.exists() {
+            fs::create_dir_all(folder).await?;
+        }
+        Ok(())
+    }
+
+    async fn store_file(&mut self, folder: &PathBuf, file: &ConfigFile) -> Result<(), Error> {
+        let mut path = folder.clone();
+        path.push(file.filename);
+        if !path.exists() {
+            fs::write(path, file.data).await?;
+        }
+        Ok(())
+    }
+
+    pub async fn repair_configuration(&mut self) -> Result<(), Error> {
+        // base path
+        let mut path = self.base_dir.clone();
+        self.create_dir(&path).await?;
+        // config folder
+        path.push("config");
+        self.create_dir(&path).await?;
+        // config files
+        self.store_file(&path, &CONFIG_TOML).await?;
+        self.store_file(&path, &DEFAULTS_INI).await?;
+        self.store_file(&path, &LOGS4RS_YML).await?;
+        self.store_file(&path, &LOKI_YML).await?;
+        self.store_file(&path, &PROMTAIL_YML).await?;
+        self.store_file(&path, &PROVISION_YML).await?;
+        Ok(())
+    }
+
+    async fn remove_configuration(&mut self) -> Result<(), Error> {
         Ok(())
     }
 }

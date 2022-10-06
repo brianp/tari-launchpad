@@ -24,8 +24,6 @@
 use std::{path::PathBuf, time::Duration};
 
 use anyhow::Error;
-// TODO: Remove this crate
-use derivative::Derivative;
 use serde::{Deserialize, Serialize};
 use tari_base_node_grpc_client::grpc::NodeIdentity;
 use tari_common_types::{emoji::EmojiId, types::PublicKey};
@@ -46,8 +44,7 @@ pub struct BaseNodeConfig {
     pub delay: Duration,
 }
 
-#[derive(Default, Derivative, Serialize, Deserialize, Clone)]
-#[derivative(Debug)]
+#[derive(Default, Debug, Serialize, Deserialize, Clone)]
 pub struct WalletConfig {
     // TODO: Remove (not needed)
     /// The time delay before starting the container and running the wallet executable
@@ -55,7 +52,6 @@ pub struct WalletConfig {
 
     /// The password to de/en-crypt the wallet database
     #[serde(skip_serializing)]
-    #[derivative(Debug = "ignore")]
     pub password: Hidden<String>,
 }
 
@@ -75,8 +71,7 @@ pub struct Sha3MinerConfig {
     pub num_mining_threads: usize,
 }
 
-#[derive(Derivative, Serialize, Deserialize, Clone)]
-#[derivative(Debug)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct MmProxyConfig {
     /// The time delay before starting the container and running the proxy executable
     pub delay: Duration,
@@ -86,8 +81,7 @@ pub struct MmProxyConfig {
     pub monero_username: String,
     /// If required, the password needed to access the monero deamon
     #[serde(skip_serializing)]
-    #[derivative(Debug = "ignore")]
-    pub monero_password: String,
+    pub monero_password: Hidden<String>,
     /// If true, provide the monero username and password to the daemon. Otherwise those strings are ignored.
     pub monero_use_auth: bool,
 }
@@ -98,7 +92,7 @@ impl Default for MmProxyConfig {
             delay: Duration::from_secs(5),
             monerod_url: DEFAULT_MONEROD_URL.to_string(),
             monero_username: "".to_string(),
-            monero_password: "".to_string(),
+            monero_password: Hidden::default(),
             monero_use_auth: false,
         }
     }
