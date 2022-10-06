@@ -1,8 +1,20 @@
+use anyhow::Error;
+use async_trait::async_trait;
 use tari_sdm::{
     ids::{ManagedTask, TaskId},
-    image::{Args, Envs, ManagedContainer, Mounts, Networks, Ports, Volumes},
+    image::{
+        checker::{CheckerContext, CheckerEvent, ContainerChecker},
+        Args,
+        Envs,
+        ManagedContainer,
+        Mounts,
+        Networks,
+        Ports,
+        Volumes,
+    },
 };
 use tari_utilities::hex::Hex;
+use tari_wallet_grpc_client::{grpc::GetIdentityRequest, WalletGrpcClient};
 
 use super::{TariBaseNode, DEFAULT_REGISTRY, GENERAL_VOLUME};
 use crate::{
@@ -49,7 +61,12 @@ impl ManagedContainer for TariWallet {
             LaunchpadInnerEvent::IdentityReady(identity) => {
                 self.identity = Some(identity);
             },
+            LaunchpadInnerEvent::WalletIdentityReady(_) => {},
         }
+    }
+
+    fn checker(&mut self) -> Box<dyn ContainerChecker<LaunchpadProtocol>> {
+        Box::new(Checker::new())
     }
 
     fn ports(&self, ports: &mut Ports) {
@@ -104,5 +121,33 @@ impl ManagedContainer for TariWallet {
             mounts.bind_path(settings.data_directory.display(), VAR_TARI_PATH);
             mounts.add_volume(SharedVolume::id(), BLOCKCHAIN_PATH);
         }
+    }
+}
+
+struct Checker {
+    identity_sent: bool,
+}
+
+impl Checker {
+    fn new() -> Self {
+        Self { identity_sent: false }
+    }
+}
+
+#[async_trait]
+impl ContainerChecker<LaunchpadProtocol> for Checker {
+    async fn on_interval(&mut self, ctx: &mut CheckerContext<LaunchpadProtocol>) -> Result<(), Error> {
+        let mut client = WalletGrpcClient::connect("http://127.0.0.1:18143").await?;
+
+        if !self.identity_sent {
+            let request = GetIdentityRequest {};
+            let identity = client.identify(request).await?.into_inner().try_into()?;
+            let event = LaunchpadInnerEvent::WalletIdentityReady(identity);
+            ctx.notify(event)?;
+            self.identity_sent = true;
+            ctx.report(CheckerEvent::Ready).ok();
+        }
+
+        Ok(())
     }
 }

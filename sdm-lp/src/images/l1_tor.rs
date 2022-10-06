@@ -78,7 +78,7 @@ impl ManagedContainer for Tor {
     }
 }
 
-pub struct Checker {
+struct Checker {
     re: Regex,
 }
 

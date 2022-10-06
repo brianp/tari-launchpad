@@ -5697,6 +5697,7 @@ dependencies = [
  "tari_common_types 0.38.5",
  "tari_sdm",
  "tari_utilities",
+ "tari_wallet_grpc_client",
  "thiserror",
  "tokio",
  "toml",
@@ -5812,6 +5813,17 @@ dependencies = [
  "serde_json",
  "thiserror",
  "zeroize",
+]
+
+[[package]]
+name = "tari_wallet_grpc_client"
+version = "0.1.0"
+source = "git+https://github.com/tari-project/tari?tag=v0.38.5#dd1d993275330b69bd51c79c640e6ac9c5c7ac46"
+dependencies = [
+ "tari_app_grpc 0.38.5",
+ "tari_common_types 0.38.5",
+ "thiserror",
+ "tonic",
 ]
 
 [[package]]

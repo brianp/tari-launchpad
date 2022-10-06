@@ -107,7 +107,7 @@ impl ManagedContainer for TariBaseNode {
     }
 }
 
-pub struct Checker {
+struct Checker {
     progress: SyncProgress,
     identity_sent: bool,
 }
