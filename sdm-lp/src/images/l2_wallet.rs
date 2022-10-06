@@ -83,10 +83,6 @@ impl ManagedContainer for TariWallet {
                 format!("/blockchain/{}", settings.tari_network.lower_case()),
             );
             envs.set("TARI_WALLET_PASSWORD", &settings.wallet_password); // HERE
-            envs.set(
-                "TARI_WALLET__P2P__TRANSPORT__TOR__CONTROL_AUTH",
-                format!("password={}", &settings.tor_password),
-            );
         }
         envs.set("SHELL", "/bin/bash");
         envs.set("TERM", "linux");
