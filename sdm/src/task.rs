@@ -273,15 +273,15 @@ where TaskContext<R>: RunnableContext<R>
     }
 
     pub fn process_event(&mut self, event: R::Event) {
-        println!("!{:<20} [event]  = {:?}", self.context.name(), event);
+        log::trace!("Processing event !{}::event={:?}", self.context.name(), event);
         if let Err(err) = self.context.process_event(event) {
             log::error!("Event processing error: {}", err);
         }
     }
 
     pub async fn update(&mut self) {
-        println!(
-            "!{:<20} [update] = {:?}",
+        log::trace!(
+            "Update with the state !{}::update={:?}",
             self.context.name(),
             self.context.status.get()
         );

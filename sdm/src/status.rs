@@ -54,7 +54,7 @@ impl<S: TaskStatus> SdmStatus<S> {
     }
 
     pub fn set(&mut self, status: S) {
-        println!("!{:<20} [status] = {:?}", self.name, self.status);
+        log::debug!("Set the new status !{}::status={:?}", self.name, self.status);
         self.status = status;
         self.has_work = true;
         self.fallback = None;

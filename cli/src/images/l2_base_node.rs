@@ -140,8 +140,7 @@ impl ContainerChecker<LaunchpadProtocol> for Checker {
         let done = matches!(response.state(), tari_app_grpc::tari_rpc::SyncState::Done);
         self.progress.update(response);
         let info = self.progress.progress_info();
-        log::warn!("PROGRESS: {:?}", info);
-        println!("!PROGRESS={}", info.block_progress);
+        log::trace!("Progress updated !common::progress={}", info.block_progress);
         ctx.report(CheckerEvent::Progress(info.block_progress as u8)).ok();
         if done {
             ctx.report(CheckerEvent::Ready).ok();
