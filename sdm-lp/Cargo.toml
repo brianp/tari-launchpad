@@ -1,0 +1,19 @@
+[package]
+name = "tari_sdm_launchpad"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.65"
+serde = "1.0.145"
+thiserror = "1.0.34"
+derivative = "2.2.0"
+async-trait = "0.1.57"
+regex = "1.6.0"
+tor-hash-passwd = "1.0.1"
+log = "0.4.17"
+tari_base_node_grpc_client = { git = "https://github.com/tari-project/tari", tag = "v0.38.5" }
+tari_common_types = { git = "https://github.com/tari-project/tari", tag = "v0.38.5" }
+tari_utilities = { git = "https://github.com/tari-project/tari_utilities.git", tag = "v0.4.5" }
+tari_app_grpc = { git = "https://github.com/tari-project/tari", tag = "v0.38.5" }
+tari_sdm = { path = "../sdm" }

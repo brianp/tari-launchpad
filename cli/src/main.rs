@@ -1,13 +1,8 @@
-mod config;
-mod images;
-mod networks;
-mod volumes;
-
 use std::path::PathBuf;
 
 use anyhow::Error;
-use config::LaunchpadConfig;
 use tari_sdm::SdmScope;
+use tari_sdm_launchpad::{config::LaunchpadConfig, images, networks, volumes};
 use tokio::signal::ctrl_c;
 
 #[tokio::main]

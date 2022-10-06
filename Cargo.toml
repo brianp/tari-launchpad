@@ -2,6 +2,7 @@
 
 members = [
     "sdm",
+    "sdm-lp",
     "cli",
     "backend",
 ]
