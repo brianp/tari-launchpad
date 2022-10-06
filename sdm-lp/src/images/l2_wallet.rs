@@ -1,6 +1,6 @@
 use tari_sdm::{
     ids::{ManagedTask, TaskId},
-    image::{Args, Envs, ManagedContainer, Mounts, Ports, Volumes},
+    image::{Args, Envs, ManagedContainer, Mounts, Networks, Ports, Volumes},
 };
 use tari_utilities::hex::Hex;
 
@@ -92,6 +92,10 @@ impl ManagedContainer for TariWallet {
         envs.set("TERM", "linux");
         envs.set("APP_NAME", "wallet");
         envs.set("APP_EXEC", "tari_console_wallet");
+    }
+
+    fn networks(&self, networks: &mut Networks) {
+        networks.add("wallet", LocalNet::id());
     }
 
     fn volumes(&self, volumes: &mut Volumes) {
