@@ -16,6 +16,10 @@ impl ManagedTask for Promtail {
     fn id() -> TaskId {
         "Promtail".into()
     }
+
+    fn deps() -> Vec<TaskId> {
+        vec![LocalNet::id()]
+    }
 }
 
 impl ManagedContainer for Promtail {

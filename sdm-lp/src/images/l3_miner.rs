@@ -8,6 +8,7 @@ use crate::{
     config::{ConnectionSettings, LaunchpadConfig, LaunchpadProtocol},
     images::VAR_TARI_PATH,
     networks::LocalNet,
+    volumes::SharedVolume,
 };
 
 #[derive(Debug, Default)]
@@ -21,7 +22,7 @@ impl ManagedTask for TariSha3Miner {
     }
 
     fn deps() -> Vec<TaskId> {
-        vec![TariBaseNode::id(), TariWallet::id()]
+        vec![TariBaseNode::id(), TariWallet::id(), LocalNet::id(), SharedVolume::id()]
     }
 }
 
@@ -33,7 +34,7 @@ impl ManagedContainer for TariSha3Miner {
     }
 
     fn image_name(&self) -> &str {
-        "tari_miner"
+        "tari_sha3_miner"
     }
 
     fn reconfigure(&mut self, config: Option<&LaunchpadConfig>) -> bool {

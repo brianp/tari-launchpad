@@ -18,6 +18,10 @@ impl ManagedTask for Grafana {
     fn id() -> TaskId {
         "Grafana".into()
     }
+
+    fn deps() -> Vec<TaskId> {
+        vec![LocalNet::id()]
+    }
 }
 
 impl ManagedContainer for Grafana {

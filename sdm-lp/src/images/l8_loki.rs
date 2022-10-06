@@ -16,6 +16,10 @@ impl ManagedTask for Loki {
     fn id() -> TaskId {
         "Loki".into()
     }
+
+    fn deps() -> Vec<TaskId> {
+        vec![LocalNet::id()]
+    }
 }
 
 impl ManagedContainer for Loki {
