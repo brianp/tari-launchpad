@@ -1,3 +1,5 @@
+mod state;
+
 use anyhow::Error;
 use tari_sdm::SdmScope;
 use tari_sdm_launchpad::{
