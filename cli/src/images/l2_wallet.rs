@@ -1,4 +1,3 @@
-use tari_common_types::types::PublicKey;
 use tari_sdm::{
     ids::{ManagedTask, TaskId},
     image::{Args, Envs, ManagedContainer, Mounts, Ports, Volumes},

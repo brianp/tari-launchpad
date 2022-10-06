@@ -1,4 +1,4 @@
-use std::{marker::PhantomData, pin::Pin};
+use std::pin::Pin;
 
 use anyhow::Error;
 use async_trait::async_trait;
@@ -6,7 +6,6 @@ use derive_more::{Deref, DerefMut};
 use futures::stream::{FusedStream, Stream, StreamExt};
 use tokio::{
     select,
-    sync::mpsc,
     time::{sleep, Duration},
 };
 

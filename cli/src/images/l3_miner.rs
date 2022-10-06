@@ -4,7 +4,7 @@ use tari_sdm::{
 };
 
 use super::{TariBaseNode, TariWallet, DEFAULT_REGISTRY, GENERAL_VOLUME};
-use crate::config::{LaunchpadConfig, LaunchpadProtocol};
+use crate::config::LaunchpadProtocol;
 
 #[derive(Debug)]
 pub struct TariSha3Miner;

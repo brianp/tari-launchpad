@@ -5,7 +5,6 @@ use crate::{
     config::ManagedProtocol,
     image::checker::{CheckerContext, CheckerEvent},
     task::TaskContext,
-    utils::TaskGuard,
 };
 
 impl<C: ManagedProtocol> TaskContext<ImageTask<C>> {

@@ -44,7 +44,7 @@ use crate::{
         Ports,
         Volumes,
     },
-    task::{RunnableTask, TaskContext},
+    task::TaskContext,
     utils::TaskGuard,
 };
 

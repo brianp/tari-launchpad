@@ -3,7 +3,7 @@ use tari_sdm::{
     network::ManagedNetwork,
 };
 
-use crate::config::{LaunchpadConfig, LaunchpadProtocol};
+use crate::config::LaunchpadProtocol;
 
 #[derive(Debug, Default)]
 pub struct LocalNet {}
