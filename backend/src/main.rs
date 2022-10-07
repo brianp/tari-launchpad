@@ -1,10 +1,10 @@
 #![cfg_attr(all(not(debug_assertions), target_os = "windows"), windows_subsystem = "windows")]
 
-mod api;
+use anyhow::Error;
 
-fn main() {
+fn main() -> Result<(), Error> {
     tauri::Builder::default()
-        .setup(api::bus_setup)
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .setup(backend::bus_setup)
+        .run(tauri::generate_context!())?;
+    Ok(())
 }

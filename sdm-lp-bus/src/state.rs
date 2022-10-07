@@ -47,6 +47,18 @@ pub struct LaunchpadState {
     pub containers: HashMap<String, String>,
 }
 
+/// An action sent from UI to the backend.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum Incoming {
+    Action(LaunchpadAction),
+}
+
+/// A message that is sent from the backend to the UI.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum Outgoing {
+    StateIsReady(LaunchpadState),
+    Delta(LaunchpadDelta),
+}
 impl LaunchpadState {
     pub fn apply(&mut self, delta: LaunchpadDelta) {
         use LaunchpadDelta::*;
@@ -64,19 +76,8 @@ pub enum LaunchpadDelta {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum Outgoing {
-    StateIsReady(LaunchpadState),
-    Delta(LaunchpadDelta),
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum LaunchpadAction {
     Connect,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum Incoming {
-    Action(LaunchpadAction),
 }
 
 pub struct LaunchpadWorker {

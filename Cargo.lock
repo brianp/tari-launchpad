@@ -4836,6 +4836,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "tari_launchpad_protocol"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "serde",
+ "tari_utilities",
+ "thiserror",
+]
+
+[[package]]
 name = "tari_metrics"
 version = "0.1.0"
 source = "git+https://github.com/tari-project/tari?tag=v0.38.5#dd1d993275330b69bd51c79c640e6ac9c5c7ac46"
@@ -4939,6 +4949,7 @@ dependencies = [
  "tari_app_grpc",
  "tari_base_node_grpc_client",
  "tari_common_types",
+ "tari_launchpad_protocol",
  "tari_sdm",
  "tari_utilities",
  "tari_wallet_grpc_client",
@@ -4957,6 +4968,7 @@ dependencies = [
  "log",
  "rand 0.8.5",
  "serde",
+ "tari_launchpad_protocol",
  "tari_sdm",
  "tari_sdm_launchpad",
  "tokio",

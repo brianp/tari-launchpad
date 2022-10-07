@@ -1,8 +1,6 @@
-use anyhow::{anyhow, Error};
-use once_cell::sync::Lazy;
+use anyhow::Error;
 use tari_sdm_launchpad_bus::LaunchpadBus;
 use tauri::{App, Manager, Wry};
-use tokio::sync::{mpsc, Mutex};
 
 static REQUESTS: &str = "requests";
 static RESPONSES: &str = "responses";
@@ -12,7 +10,7 @@ pub fn bus_setup(app: &mut App<Wry>) -> Result<(), Box<dyn std::error::Error>> {
     let bus = LaunchpadBus::start()?;
 
     let in_tx = bus.incoming;
-    let id = app.listen_global(REQUESTS, move |event| {
+    let _id = app.listen_global(REQUESTS, move |event| {
         if let Some(payload) = event.payload() {
             let res = serde_json::from_str(payload);
             match res {
