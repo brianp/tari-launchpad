@@ -16,7 +16,6 @@ use super::DEFAULT_REGISTRY;
 use crate::{
     config::{ConnectionSettings, LaunchpadConfig, LaunchpadProtocol},
     networks::LocalNet,
-    volumes::SharedVolume,
 };
 
 #[derive(Debug, Default)]
@@ -30,7 +29,7 @@ impl ManagedTask for Tor {
     }
 
     fn deps() -> Vec<TaskId> {
-        vec![LocalNet::id(), SharedVolume::id()]
+        vec![LocalNet::id()]
     }
 }
 

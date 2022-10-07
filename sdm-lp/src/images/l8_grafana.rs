@@ -3,13 +3,13 @@ use tari_sdm::{
     image::{Envs, ManagedContainer, Mounts, Networks, Ports, Volumes},
 };
 
-use super::GRAFANA_REGISTRY;
+use super::{GRAFANA_PATH, GRAFANA_REGISTRY};
 use crate::{
     config::{ConnectionSettings, LaunchpadConfig, LaunchpadProtocol},
-    images::{GENERAL_VOLUME, GRAFANA_DEFAULTS_PATH, GRAFANA_PROVISION_PATH, GRAFANA_VOLUME},
+    images::{GENERAL_VOLUME, GRAFANA_DEFAULTS_PATH, GRAFANA_PROVISION_PATH, GRAFANA_VOLUME, VAR_TARI_PATH},
     networks::LocalNet,
+    volumes::SharedVolume,
 };
-use crate::images::VAR_TARI_PATH;
 
 #[derive(Debug, Default)]
 pub struct Grafana {
@@ -22,7 +22,7 @@ impl ManagedTask for Grafana {
     }
 
     fn deps() -> Vec<TaskId> {
-        vec![LocalNet::id()]
+        vec![LocalNet::id(), SharedVolume::id()]
     }
 }
 
@@ -88,6 +88,7 @@ impl ManagedContainer for Grafana {
                     .display(),
                 GRAFANA_PROVISION_PATH,
             );
+            mounts.add_volume(SharedVolume::id(), GRAFANA_PATH);
         }
     }
 }
