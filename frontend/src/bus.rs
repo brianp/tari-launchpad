@@ -1,3 +1,5 @@
+use anyhow::Error;
+use tari_launchpad_protocol::Incoming;
 use wasm_bindgen::prelude::{wasm_bindgen, Closure, JsValue};
 
 #[wasm_bindgen]
@@ -8,8 +10,18 @@ extern "C" {
     fn emit(event: &str, object: JsValue) -> JsValue;
 }
 
-pub fn request() {
-    emit("requests", JsValue::NULL);
+pub fn request(incoming: Incoming) {
+    log::info!("Sending: {:?}", incoming);
+    if let Err(err) = request_impl(incoming) {
+        log::error!("Can't serialize an incoming event: {}", err);
+    }
+}
+
+fn request_impl(incoming: Incoming) -> Result<(), Error> {
+    let value = serde_json::to_string(&incoming)?;
+    let js_value = JsValue::from_str(&value);
+    emit("requests", js_value);
+    Ok(())
 }
 
 pub async fn connect_to_bus() {

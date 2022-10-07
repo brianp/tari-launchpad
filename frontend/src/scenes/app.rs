@@ -1,7 +1,9 @@
 use anyhow::Error;
+use tari_launchpad_protocol::Incoming;
 use yew::{html, Html};
 
 use crate::{
+    bus,
     scenes::{counter::Counter, main_scene::MainScene},
     states::local_state::{LocalState, LocalStateDelta},
     widget::{Connected, Context, FromDelta, Pod, Widget},
@@ -14,6 +16,7 @@ pub struct App {
 #[derive(Clone)]
 pub enum Msg {
     Event,
+    Start,
 }
 
 impl FromDelta<LocalState> for Msg {
@@ -36,6 +39,10 @@ impl Widget for App {
             Msg::Event => {
                 // self.local_state.update(LocalStateDelta::Add);
             },
+            Msg::Start => {
+                log::info!("Starting...");
+                bus::request(Incoming::Start);
+            },
         }
         ctx.redraw();
         Ok(())
@@ -43,7 +50,10 @@ impl Widget for App {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
-            <Pod<MainScene> />
+            <div>
+                <div onclick={ctx.event(Msg::Start)} >{ "Start" }</div>
+                <Pod<MainScene> />
+            </div>
             /*
             <div>
                 <Pod<Counter> />

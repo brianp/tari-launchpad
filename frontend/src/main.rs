@@ -6,6 +6,6 @@ fn main() {
 }
 
 async fn entrypoint() {
-    frontend::api::connect_to_bus().await;
+    frontend::bus::connect_to_bus().await;
     yew::start_app::<Pod<App>>();
 }

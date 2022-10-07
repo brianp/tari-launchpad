@@ -1411,6 +1411,7 @@ dependencies = [
  "js-sys",
  "log",
  "once_cell",
+ "serde_json",
  "slab",
  "strum 0.24.1",
  "tari_launchpad_protocol",

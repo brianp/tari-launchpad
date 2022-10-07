@@ -1,4 +1,4 @@
-pub mod api;
+pub mod bus;
 mod scenes;
 mod states;
 mod widget;

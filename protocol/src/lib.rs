@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Incoming {
     Action(LaunchpadAction),
+    Start,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
