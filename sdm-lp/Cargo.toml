@@ -1,6 +1,9 @@
 [package]
 name = "tari_sdm_launchpad"
 version = "0.1.0"
+authors = ["The Tari Development Community"]
+license = "BSD-3-Clause"
+repository = "https://github.com/tari-project/tari-launchpad"
 edition = "2021"
 
 [dependencies]

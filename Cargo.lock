@@ -5705,6 +5705,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "tari_sdm_launchpad_bus"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "env_logger",
+ "log",
+ "rand 0.8.5",
+ "serde",
+ "tari_sdm",
+ "tari_sdm_launchpad",
+ "tokio",
+]
+
+[[package]]
 name = "tari_service_framework"
 version = "0.38.3"
 source = "git+https://github.com/tari-project/tari?tag=v0.38.3#0a396c244886cf356d24ed27c12000ab32defa4c"

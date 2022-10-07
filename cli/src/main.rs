@@ -1,5 +1,3 @@
-mod state;
-
 use anyhow::Error;
 use tari_sdm::SdmScope;
 use tari_sdm_launchpad::{
@@ -16,15 +14,15 @@ async fn main() -> Result<(), Error> {
     env_logger::try_init()?;
     let mut scope = SdmScope::connect("esmeralda")?;
 
-    scope.add_network(networks::LocalNet::default()).await?;
-    scope.add_volume(volumes::SharedVolume::default()).await?;
-    scope.add_image(images::Tor::default()).await?;
-    scope.add_image(images::TariBaseNode::default()).await?;
-    scope.add_image(images::TariWallet::default()).await?;
-    scope.add_image(images::TariSha3Miner::default()).await?;
-    scope.add_image(images::Loki::default()).await?;
-    scope.add_image(images::Promtail::default()).await?;
-    scope.add_image(images::Grafana::default()).await?;
+    scope.add_network(networks::LocalNet::default())?;
+    scope.add_volume(volumes::SharedVolume::default())?;
+    scope.add_image(images::Tor::default())?;
+    scope.add_image(images::TariBaseNode::default())?;
+    scope.add_image(images::TariWallet::default())?;
+    scope.add_image(images::TariSha3Miner::default())?;
+    scope.add_image(images::Loki::default())?;
+    scope.add_image(images::Promtail::default())?;
+    scope.add_image(images::Grafana::default())?;
 
     ctrl_c().await?;
     log::info!("Set config");
@@ -43,16 +41,16 @@ async fn main() -> Result<(), Error> {
         wallet: Some(wallet_config),
         ..Default::default()
     };
-    scope.set_config(Some(config.clone())).await?;
+    scope.set_config(Some(config.clone()))?;
 
     ctrl_c().await?;
     log::info!("Turn off monitoring");
     config.with_monitoring = false;
-    scope.set_config(Some(config)).await?;
+    scope.set_config(Some(config))?;
 
     ctrl_c().await?;
     log::info!("Reset config");
-    scope.set_config(None).await?;
+    scope.set_config(None)?;
 
     ctrl_c().await?;
     scope.stop();

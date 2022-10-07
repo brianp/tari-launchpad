@@ -80,7 +80,7 @@ impl<C: ManagedProtocol> SdmScope<C> {
         })
     }
 
-    pub async fn add_image<I>(&mut self, entry: I) -> Result<(), Error>
+    pub fn add_image<I>(&mut self, entry: I) -> Result<(), Error>
     where I: ManagedContainer<Protocol = C> + ManagedTask {
         // TODO: DRY!
         let entry = Box::new(entry);
@@ -95,7 +95,7 @@ impl<C: ManagedProtocol> SdmScope<C> {
         Ok(())
     }
 
-    pub async fn add_network<N>(&mut self, entry: N) -> Result<(), Error>
+    pub fn add_network<N>(&mut self, entry: N) -> Result<(), Error>
     where N: ManagedNetwork<Protocol = C> + ManagedTask {
         // TODO: DRY!
         let entry = Box::new(entry);
@@ -110,7 +110,7 @@ impl<C: ManagedProtocol> SdmScope<C> {
         Ok(())
     }
 
-    pub async fn add_volume<V>(&mut self, entry: V) -> Result<(), Error>
+    pub fn add_volume<V>(&mut self, entry: V) -> Result<(), Error>
     where V: ManagedVolume<Protocol = C> + ManagedTask {
         // TODO: DRY!
         let entry = Box::new(entry);
@@ -125,7 +125,7 @@ impl<C: ManagedProtocol> SdmScope<C> {
         Ok(())
     }
 
-    pub async fn set_config(&mut self, config: Option<C::Config>) -> Result<(), Error> {
+    pub fn set_config(&mut self, config: Option<C::Config>) -> Result<(), Error> {
         let config = config.map(Arc::new);
         let req = ControlEvent::SetConfig(config);
         self.send(req)
