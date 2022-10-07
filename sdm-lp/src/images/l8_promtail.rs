@@ -1,12 +1,13 @@
 use tari_sdm::{
     ids::{ManagedTask, TaskId},
-    image::{Args, ManagedContainer, Networks, Ports},
+    image::{Args, ManagedContainer, Mounts, Networks, Ports},
 };
 
-use super::GRAFANA_REGISTRY;
+use super::{GRAFANA_PATH, GRAFANA_REGISTRY};
 use crate::{
     config::{LaunchpadConfig, LaunchpadProtocol},
     networks::LocalNet,
+    volumes::SharedVolume,
 };
 
 #[derive(Debug, Default)]
@@ -18,7 +19,7 @@ impl ManagedTask for Promtail {
     }
 
     fn deps() -> Vec<TaskId> {
-        vec![LocalNet::id()]
+        vec![LocalNet::id(), SharedVolume::id()]
     }
 }
 
@@ -47,5 +48,9 @@ impl ManagedContainer for Promtail {
 
     fn reconfigure(&mut self, config: Option<&LaunchpadConfig>) -> bool {
         config.map(|conf| conf.with_monitoring).unwrap_or_default()
+    }
+
+    fn mounts(&self, mounts: &mut Mounts) {
+        mounts.add_volume(SharedVolume::id(), GRAFANA_PATH);
     }
 }
