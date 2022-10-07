@@ -1,0 +1,54 @@
+[package]
+name = "tari_launchpad"
+version = "0.32.5"
+description = "A unified user interface for a Tari node, wallet and miner, with a focus on ease-of-use and UX."
+authors = ["The Tari Development Community"]
+license = "BSD-3-Clause"
+repository = "https://github.com/tari-project/tari-launchpad"
+edition = "2018"
+build = "src/build.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { version = "1.0.1", features = [] }
+
+[dependencies]
+tari_common_types = { git = "https://github.com/tari-project/tari", tag = "v0.38.3" }
+tari_app_utilities = { git = "https://github.com/tari-project/tari", tag = "v0.38.3" }
+tari_comms = { git = "https://github.com/tari-project/tari", tag = "v0.38.3" }
+tari_app_grpc = { git = "https://github.com/tari-project/tari", tag = "v0.38.3" }
+tari_common = { git = "https://github.com/tari-project/tari", tag = "v0.38.3" }
+tari_utilities = { git = "https://github.com/tari-project/tari_utilities.git", tag = "v0.4.5" }
+
+anyhow = "1.0.64"
+bollard = "0.13.0"
+chrono = "0.4.20"
+config = "0.13.2"
+derive_more = "0.99.17"
+env_logger = "0.9.0"
+lazy_static = "1.4.0"
+log = "0.4.17"
+rand = "0.8.5"
+serde_json = "1.0.85"
+serde = { version = "1.0.144", features = ["derive"] }
+strum = { version = "0.24.1", features = ["derive"] }
+tauri = { version = "1.0.1", features = ["api-all", "cli", "macos-private-api"] }
+toml = "0.5.9"
+tor-hash-passwd = "1.0.1"
+thiserror = "1.0.34"
+tokio = { version = "1.21.0", features = ["sync"] }
+futures = "0.3.24"
+regex = "1.6.0"
+derivative = "2.2.0"
+# Forcing this version due to conflicts in dependencies
+sqlx-core = { version = "=0.5.7" }
+tauri-plugin-sql = { git = "https://github.com/tauri-apps/tauri-plugin-sql", features = ["sqlite"], branch = "release" }
+tonic = "0.6.2"
+hex = "0.4.3"
+reqwest = { version = "0.11.11", features = ["json"] }
+
+[features]
+# Hack to fix a tauri bug
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

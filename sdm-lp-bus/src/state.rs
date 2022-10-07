@@ -4,13 +4,44 @@ use anyhow::Error;
 use serde::{Deserialize, Serialize};
 use tari_sdm::SdmScope;
 use tari_sdm_launchpad::config::{LaunchpadConfig, LaunchpadProtocol};
-use tokio::{select, sync::mpsc};
+use tokio::{select, sync::mpsc, task::JoinHandle};
+
+pub struct LaunchpadBus {
+    pub handle: JoinHandle<()>,
+    pub incoming: mpsc::UnboundedSender<Incoming>,
+    pub outgoing: mpsc::UnboundedReceiver<Outgoing>,
+}
+
+impl LaunchpadBus {
+    pub fn start() -> Result<Self, Error> {
+        let state = LaunchpadState {
+            config: LaunchpadConfig::default(),
+            containers: HashMap::new(),
+        };
+
+        let mut scope = SdmScope::connect("esmeralda")?;
+        let (in_tx, in_rx) = mpsc::unbounded_channel();
+        let (out_tx, out_rx) = mpsc::unbounded_channel();
+        let worker = LaunchpadWorker {
+            state,
+            scope,
+            in_rx,
+            out_tx,
+        };
+        let handle = tokio::spawn(worker.entrypoint());
+        Ok(Self {
+            handle,
+            incoming: in_tx,
+            outgoing: out_rx,
+        })
+    }
+}
 
 pub struct ContainerRecord {
     pub logs: VecDeque<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LaunchpadState {
     pub config: LaunchpadConfig,
     pub containers: HashMap<String, String>,
@@ -27,23 +58,23 @@ impl LaunchpadState {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum LaunchpadDelta {
     UpdateConfig(LaunchpadConfig),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Outgoing {
     StateIsReady(LaunchpadState),
     Delta(LaunchpadDelta),
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum LaunchpadAction {
     Connect,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Incoming {
     Action(LaunchpadAction),
 }
@@ -56,22 +87,6 @@ pub struct LaunchpadWorker {
 }
 
 impl LaunchpadWorker {
-    async fn init() -> Result<Self, Error> {
-        let state = LaunchpadState {
-            config: LaunchpadConfig::default(),
-            containers: HashMap::new(),
-        };
-        let mut scope = SdmScope::connect("esmeralda")?;
-        let (in_tx, in_rx) = mpsc::unbounded_channel();
-        let (out_tx, out_rx) = mpsc::unbounded_channel();
-        Ok(Self {
-            state,
-            scope,
-            in_rx,
-            out_tx,
-        })
-    }
-
     async fn entrypoint(mut self) {
         loop {
             select! {

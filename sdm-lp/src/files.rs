@@ -5,7 +5,7 @@ use tokio::fs;
 
 macro_rules! embed_file {
     ($f:literal) => {
-        ConfigFile::new($f, include_str!(concat!("../../backend/assets/", $f)))
+        ConfigFile::new($f, include_str!(concat!("../assets/", $f)))
     };
 }
 

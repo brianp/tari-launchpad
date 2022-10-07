@@ -1,83 +1,66 @@
 {
+  "build": {
+    "beforeBuildCommand": "",
+    "beforeDevCommand": "",
+    "devPath": "../frontend/dist",
+    "distDir": "../frontend/dist",
+    "withGlobalTauri": true
+  },
   "package": {
     "productName": "tari-launchpad",
-    "version": "1.1.0"
-  },
-  "build": {
-    "distDir": "../gui-react/build",
-    "devPath": "http://localhost:3000",
-    "beforeDevCommand": " cd ../gui-react && npm run start",
-    "beforeBuildCommand": "cd ../gui-react && npm run build"
+    "version": "0.1.0"
   },
   "tauri": {
-    "cli": {
-      "description": "A simple single-click UI to launch a Tari node, wallet and miner",
-      "args": [
-        {
-          "short": "c",
-          "name": "config-file",
-          "description": "The path to the configuration file to use for the launcher",
-          "takesValue": true
-        }
-      ],
-      "subcommands": {}
+    "allowlist": {
+      "all": true
     },
     "bundle": {
       "active": true,
-      "targets": "all",
-      "identifier": "com.tari.launchpad",
-      "icon": [
-        "icons/favicon-32x32.png",
-        "icons/apple-icon-120x120.png",
-        "icons/android-icon-192x192.png"
-      ],
-      "resources": ["assets/*"],
-      "externalBin": [],
-      "copyright": "(c) The Tari Development community 2021",
       "category": "DeveloperTool",
-      "shortDescription": "",
-      "longDescription": "",
+      "copyright": "",
       "deb": {
         "depends": []
       },
+      "externalBin": [],
+      "icon": [
+        "icons/32x32.png",
+        "icons/128x128.png",
+        "icons/128x128@2x.png",
+        "icons/icon.icns",
+        "icons/icon.ico"
+      ],
+      "identifier": "com.tauri.dev",
+      "longDescription": "",
       "macOS": {
-        "frameworks": [],
-        "minimumSystemVersion": "",
+        "entitlements": null,
         "exceptionDomain": "",
-        "signingIdentity": null,
-        "entitlements": null
+        "frameworks": [],
+        "providerShortName": null,
+        "signingIdentity": null
       },
+      "resources": [],
+      "shortDescription": "",
+      "targets": "all",
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",
         "timestampUrl": ""
       }
     },
+    "security": {
+      "csp": null
+    },
     "updater": {
       "active": false
     },
-    "allowlist": {
-      "dialog": {
-        "open": true
-      },
-      "all": true
-    },
     "windows": [
       {
-        "title": "Tari Launchpad",
-        "width": 1200,
-        "minWidth": 1200,
-        "height": 800,
-        "minHeight": 796,
-        "resizable": true,
         "fullscreen": false,
-        "decorations": false,
-        "transparent": true
+        "height": 600,
+        "resizable": true,
+        "title": "Tari Launchpad",
+        "width": 800
       }
-    ],
-    "security": {
-      "csp": "default-src blob: data: filesystem: ws: wss: http: https: tauri: 'unsafe-eval' 'unsafe-inline' 'self' img-src: 'self'"
-    },
-    "macOSPrivateApi": true
+    ]
   }
 }

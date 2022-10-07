@@ -1,0 +1,33 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.main_scene {
+    height: 100vh;
+    width: 100vw;
+    padding: 0 96px;
+}
+
+.main_scene-content {
+    padding: 60px 0;
+}
+
+.main_scene-header {
+    display: flex;
+    flex-direction: row;
+}
+
+.main_scene-header .menu-item {
+    padding: 8px 12px;
+    margin-right: 32px;
+
+    &.selected {
+        border-bottom: 4px solid #20053D;
+        border-radius: 12px;
+    }
+}
