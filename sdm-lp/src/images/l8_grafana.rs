@@ -63,6 +63,7 @@ impl ManagedContainer for Grafana {
     }
 
     fn reconfigure(&mut self, config: Option<&LaunchpadConfig>) -> bool {
+        self.settings = config.map(ConnectionSettings::from);
         config.map(|conf| conf.with_monitoring).unwrap_or_default()
     }
 
