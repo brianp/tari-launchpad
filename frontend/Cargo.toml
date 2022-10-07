@@ -8,6 +8,8 @@ repository = "https://github.com/tari-project/tari-launchpad"
 license = "BSD-3-Clause"
 
 [dependencies]
+tari_launchpad_protocol = { path = "../protocol" }
+
 anyhow = "1.0.64"
 derive_more = "0.99.17"
 futures = "0.3.24"

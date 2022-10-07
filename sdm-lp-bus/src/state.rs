@@ -2,6 +2,7 @@ use std::collections::{HashMap, VecDeque};
 
 use anyhow::Error;
 use serde::{Deserialize, Serialize};
+use tari_launchpad_protocol::{Incoming, LaunchpadAction, LaunchpadDelta, LaunchpadState, Outgoing};
 use tari_sdm::SdmScope;
 use tari_sdm_launchpad::config::{LaunchpadConfig, LaunchpadProtocol};
 use tokio::{select, sync::mpsc, task::JoinHandle};
@@ -35,49 +36,6 @@ impl LaunchpadBus {
             outgoing: out_rx,
         })
     }
-}
-
-pub struct ContainerRecord {
-    pub logs: VecDeque<String>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LaunchpadState {
-    pub config: LaunchpadConfig,
-    pub containers: HashMap<String, String>,
-}
-
-/// An action sent from UI to the backend.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum Incoming {
-    Action(LaunchpadAction),
-}
-
-/// A message that is sent from the backend to the UI.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum Outgoing {
-    StateIsReady(LaunchpadState),
-    Delta(LaunchpadDelta),
-}
-impl LaunchpadState {
-    pub fn apply(&mut self, delta: LaunchpadDelta) {
-        use LaunchpadDelta::*;
-        match delta {
-            UpdateConfig(config) => {
-                self.config = config;
-            },
-        }
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum LaunchpadDelta {
-    UpdateConfig(LaunchpadConfig),
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum LaunchpadAction {
-    Connect,
 }
 
 pub struct LaunchpadWorker {

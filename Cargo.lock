@@ -1413,6 +1413,7 @@ dependencies = [
  "once_cell",
  "slab",
  "strum 0.24.1",
+ "tari_launchpad_protocol",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
