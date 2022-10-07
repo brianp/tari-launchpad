@@ -20,6 +20,9 @@ static GRAFANA_REGISTRY: &str = "grafana";
 
 static GENERAL_VOLUME: &str = "/var/tari";
 static BLOCKCHAIN_VOLUME: &str = "/blockchain";
+static GRAFANA_VOLUME: &str = "/grafana";
 
 static VAR_TARI_PATH: &str = "/var/tari";
 static BLOCKCHAIN_PATH: &str = "/blockchain";
+static GRAFANA_DEFAULTS_PATH: &str = "/usr/share/grafana/conf/defaults.ini";
+static GRAFANA_PROVISION_PATH: &str = "/etc/grafana/provisioning/datasources/all.yml";
