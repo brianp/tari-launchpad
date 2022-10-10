@@ -28,3 +28,4 @@ static GRAFANA_PATH: &str = "/grafana";
 static GRAFANA_DEFAULTS_PATH: &str = "/usr/share/grafana/conf/defaults.ini";
 static GRAFANA_PROVISION_PATH: &str = "/etc/grafana/provisioning/datasources/all.yml";
 static LOKI_DEFAULTS_PATH: &str = "/usr/share/grafana/conf/defaults.ini";
+static PROMTAIL_CONFIG_PATH: &str = "/etc/promtail/config.yml";
