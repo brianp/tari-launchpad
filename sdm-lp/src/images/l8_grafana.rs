@@ -59,7 +59,6 @@ impl ManagedContainer for Grafana {
 
     fn ports(&self, ports: &mut Ports) {
         ports.add(18_300);
-        ports.add(3000);
     }
 
     fn reconfigure(&mut self, config: Option<&LaunchpadConfig>) -> bool {
