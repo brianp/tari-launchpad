@@ -2,15 +2,20 @@ use tari_sdm::{
     ids::{ManagedTask, TaskId},
     image::{Args, ManagedContainer, Networks, Ports},
 };
+use tari_sdm::image::{Envs, Mounts, Volumes};
 
 use super::GRAFANA_REGISTRY;
 use crate::{
     config::{LaunchpadConfig, LaunchpadProtocol},
     networks::LocalNet,
 };
+use crate::config::ConnectionSettings;
+use crate::images::{GENERAL_VOLUME, LOKI_DEFAULTS_PATH, VAR_TARI_PATH};
 
 #[derive(Debug, Default)]
-pub struct Loki;
+pub struct Loki {
+    settings: Option<ConnectionSettings>,
+}
 
 impl ManagedTask for Loki {
     fn id() -> TaskId {
@@ -33,6 +38,23 @@ impl ManagedContainer for Loki {
         "loki"
     }
 
+    fn envs(&self, envs: &mut Envs) {
+        let path = concat!(
+        "/usr/share/grafana/bin:",
+        "/usr/local/sbin:",
+        "/usr/local/bin:",
+        "/usr/sbin:",
+        "/usr/bin:",
+        "/sbin:",
+        "/bin"
+        );
+        envs.set("PATH", path);
+        if let Some(settings) = self.settings.as_ref() {
+            // TODO: Check the `display` call is correct here?
+            envs.set("DATA_FOLDER", settings.data_directory.display());
+        }
+    }
+
     fn args(&self, args: &mut Args) {
         args.set("-config.file", "/etc/loki/local-config.yaml");
     }
@@ -46,6 +68,22 @@ impl ManagedContainer for Loki {
     }
 
     fn reconfigure(&mut self, config: Option<&LaunchpadConfig>) -> bool {
-        config.map(|conf| conf.with_monitoring).unwrap_or_default()
+        self.settings = config.map(ConnectionSettings::from);
+        self.settings.is_some()
+    }
+
+    fn volumes(&self, volumes: &mut Volumes) {
+        volumes.add(GENERAL_VOLUME);
+    }
+
+    fn mounts(&self, mounts: &mut Mounts) {
+        if let Some(settings) = self.settings.as_ref() {
+            // TODO: Avoid using display here
+            mounts.bind_path(settings.data_directory.display(), VAR_TARI_PATH);
+            mounts.bind_path(
+                settings.data_directory.join("config").join("defaults.ini").display(),
+                LOKI_DEFAULTS_PATH,
+            );
+        }
     }
 }
