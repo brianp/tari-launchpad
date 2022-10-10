@@ -50,6 +50,7 @@ impl LaunchpadWorker {
         let mut scope = SdmScope::connect("esmeralda")?;
         scope.add_network(networks::LocalNet::default())?;
         scope.add_volume(volumes::SharedVolume::default())?;
+        scope.add_volume(volumes::SharedGrafanaVolume::default())?;
         scope.add_image(images::Tor::default())?;
         let worker = LaunchpadWorker {
             state,

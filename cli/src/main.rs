@@ -16,6 +16,7 @@ async fn main() -> Result<(), Error> {
 
     scope.add_network(networks::LocalNet::default())?;
     scope.add_volume(volumes::SharedVolume::default())?;
+    scope.add_volume(volumes::SharedGrafanaVolume::default())?;
     scope.add_image(images::Tor::default())?;
     scope.add_image(images::TariBaseNode::default())?;
     scope.add_image(images::TariWallet::default())?;

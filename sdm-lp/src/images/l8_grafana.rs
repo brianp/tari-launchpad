@@ -9,6 +9,7 @@ use crate::{
     images::{GENERAL_VOLUME, GRAFANA_DEFAULTS_PATH, GRAFANA_PROVISION_PATH, GRAFANA_VOLUME, VAR_TARI_PATH},
     networks::LocalNet,
 };
+use crate::volumes::SharedGrafanaVolume;
 
 #[derive(Debug, Default)]
 pub struct Grafana {
@@ -21,7 +22,7 @@ impl ManagedTask for Grafana {
     }
 
     fn deps() -> Vec<TaskId> {
-        vec![LocalNet::id()]
+        vec![LocalNet::id(), SharedGrafanaVolume::id()]
     }
 }
 
@@ -68,10 +69,10 @@ impl ManagedContainer for Grafana {
 
     fn volumes(&self, volumes: &mut Volumes) {
         volumes.add(GENERAL_VOLUME);
-        volumes.add(GRAFANA_VOLUME);
     }
 
     fn mounts(&self, mounts: &mut Mounts) {
+        mounts.add_volume(SharedGrafanaVolume::id(), GRAFANA_VOLUME);
         if let Some(settings) = self.settings.as_ref() {
             // TODO: Avoid using display here
             mounts.bind_path(settings.data_directory.display(), VAR_TARI_PATH);

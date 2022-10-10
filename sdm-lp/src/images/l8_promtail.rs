@@ -11,7 +11,8 @@ use crate::{
     volumes::SharedVolume,
 };
 use crate::config::ConnectionSettings;
-use crate::images::{GENERAL_VOLUME, PROMTAIL_CONFIG_PATH, VAR_TARI_PATH};
+use crate::images::{GENERAL_VOLUME, Grafana, GRAFANA_VOLUME, PROMTAIL_CONFIG_PATH, VAR_TARI_PATH};
+use crate::volumes::SharedGrafanaVolume;
 
 #[derive(Debug, Default)]
 pub struct Promtail {
@@ -24,7 +25,7 @@ impl ManagedTask for Promtail {
     }
 
     fn deps() -> Vec<TaskId> {
-        vec![LocalNet::id(), SharedVolume::id()]
+        vec![LocalNet::id(), SharedVolume::id(), SharedGrafanaVolume::id(), Grafana::id()]
     }
 }
 
@@ -78,7 +79,7 @@ impl ManagedContainer for Promtail {
     }
 
     fn mounts(&self, mounts: &mut Mounts) {
-        mounts.add_volume(SharedVolume::id(), GRAFANA_PATH);
+        mounts.add_volume(SharedGrafanaVolume::id(), GRAFANA_VOLUME);
         if let Some(settings) = self.settings.as_ref() {
             // TODO: Avoid using display here
             mounts.bind_path(settings.data_directory.display(), VAR_TARI_PATH);

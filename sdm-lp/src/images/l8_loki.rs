@@ -10,7 +10,8 @@ use crate::{
     networks::LocalNet,
 };
 use crate::config::ConnectionSettings;
-use crate::images::{GENERAL_VOLUME, LOKI_DEFAULTS_PATH, VAR_TARI_PATH};
+use crate::images::{GENERAL_VOLUME, Grafana, GRAFANA_VOLUME, LOKI_DEFAULTS_PATH, VAR_TARI_PATH};
+use crate::volumes::SharedGrafanaVolume;
 
 #[derive(Debug, Default)]
 pub struct Loki {
@@ -23,7 +24,7 @@ impl ManagedTask for Loki {
     }
 
     fn deps() -> Vec<TaskId> {
-        vec![LocalNet::id()]
+        vec![LocalNet::id(), SharedGrafanaVolume::id(), Grafana::id()]
     }
 }
 
@@ -77,6 +78,7 @@ impl ManagedContainer for Loki {
     }
 
     fn mounts(&self, mounts: &mut Mounts) {
+        mounts.add_volume(SharedGrafanaVolume::id(), GRAFANA_VOLUME);
         if let Some(settings) = self.settings.as_ref() {
             // TODO: Avoid using display here
             mounts.bind_path(settings.data_directory.display(), VAR_TARI_PATH);

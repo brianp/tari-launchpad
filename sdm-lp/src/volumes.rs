@@ -25,3 +25,24 @@ impl ManagedVolume for SharedVolume {
         true
     }
 }
+
+#[derive(Debug, Default)]
+pub struct SharedGrafanaVolume {}
+
+impl ManagedTask for SharedGrafanaVolume {
+    fn id() -> TaskId {
+        "SharedGrafanaVolume".into()
+    }
+}
+
+impl ManagedVolume for SharedGrafanaVolume {
+    type Protocol = LaunchpadProtocol;
+
+    fn volume_name(&self) -> &str {
+        "shared_grafana_volume"
+    }
+
+    fn reconfigure(&mut self, _config: Option<&LaunchpadConfig>) -> bool {
+        true
+    }
+}
